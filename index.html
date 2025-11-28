@@ -93,7 +93,34 @@
         }
         .brand i { color: var(--neon-green); animation: spin 10s linear infinite; }
 
-        .nav-items { display: flex; gap: 5px; }
+        .nav-right-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .small-nav-image {
+            width: 30px; 
+            height: 30px; 
+            border-radius: 5px; 
+            border: 1px solid var(--neon-cyan);
+            object-fit: cover;
+            cursor: pointer;
+        }
+        .social-link {
+            font-size: 1.5rem;
+            color: var(--neon-cyan);
+            transition: color 0.3s, text-shadow 0.3s;
+        }
+        .social-link:hover {
+            color: #fff;
+            text-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        .nav-items { 
+            display: flex; 
+            gap: 5px; 
+            display: none; 
+        }
 
         .nav-btn {
             background: transparent; border: 1px solid transparent; color: #aaa;
@@ -270,9 +297,90 @@
         .about-card p { color: #ccc; line-height: 1.8; }
 
 
+        /* Media Query for Mobile (less than 768px) */
         @media (max-width: 768px) {
             .hero-title { font-size: 3rem; }
-            .nav-items { display: none; }
+            
+            .nav-items { 
+                display: none !important; 
+            }
+            .nav-toggle {
+                display: block !important; 
+                background: none;
+                border: none;
+                color: var(--neon-green);
+                font-size: 1.5rem;
+                cursor: pointer;
+                padding: 10px;
+            }
+            .nav-right-controls {
+                gap: 8px; 
+                order: 3;
+            }
+            .brand {
+                order: 1;
+            }
+            nav {
+                padding: 0 5%;
+            }
+
+            .view-section {
+                padding: 20px 5%;
+            }
+            .grid-3d, .vault-grid {
+                grid-template-columns: 1fr;
+            }
+            .card-3d, .malware-box {
+                padding: 20px;
+            }
+            .forensics-container {
+                padding: 20px;
+                margin: 20px auto;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 80px; 
+                right: -300px; 
+                width: 250px;
+                height: calc(100vh - 80px);
+                background: var(--glass);
+                backdrop-filter: blur(15px);
+                z-index: 999;
+                padding: 20px 0;
+                box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+                transition: right 0.3s ease-in-out;
+                display: flex;
+                flex-direction: column;
+            }
+            .sidebar.open {
+                right: 0;
+            }
+            .sidebar-btn {
+                padding: 15px 25px;
+                text-align: right;
+                color: #ddd;
+                font-family: var(--font-main);
+                font-weight: bold;
+                border-bottom: 1px dashed #222;
+                cursor: pointer;
+            }
+            .sidebar-btn:hover {
+                background: rgba(0, 255, 65, 0.1);
+                color: var(--neon-green);
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .nav-items { 
+                display: flex !important;
+            }
+            .nav-toggle {
+                display: none !important;
+            }
+            .sidebar {
+                display: none !important;
+            }
         }
     </style>
 </head>
@@ -288,6 +396,7 @@
         <div class="brand" onclick="router('home')">
             <i class="fas fa-biohazard"></i> EKO
         </div>
+        
         <div class="nav-items">
             <button class="nav-btn active" onclick="router('home')" data-key="nav_home">الرئيسية</button>
             <button class="nav-btn" onclick="router('modules')" data-key="nav_modules">الوحدات</button>
@@ -296,11 +405,33 @@
             <button class="nav-btn" onclick="router('about')" data-key="nav_about">من أنا</button>
             <button class="nav-btn" onclick="router('login')" data-key="nav_login" style="color: var(--neon-red)">دخول</button>
         </div>
-        <div class="lang-switch">
-            <button class="lang-btn active" onclick="setLang('ar')">AR</button>
-            <button class="lang-btn" onclick="setLang('en')">EN</button>
+        
+        <div class="nav-right-controls">
+            <button class="nav-toggle" onclick="toggleSidebar()" style="display: none;">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <img src="https://placehold.co/30x30/00E5FF/020202?text=E" class="small-nav-image" alt="Eko Logo" onclick="router('about')" onerror="this.style.display='none'">
+
+            <a href="https://t.me/eko222" target="_blank" class="social-link" title="انضم لقناة التلجرام">
+                <i class="fab fa-telegram-plane"></i>
+            </a>
+
+            <div class="lang-switch">
+                <button class="lang-btn active" onclick="setLang('ar')">AR</button>
+                <button class="lang-btn" onclick="setLang('en')">EN</button>
+            </div>
         </div>
     </nav>
+
+    <div class="sidebar" id="sidebar">
+        <button class="sidebar-btn" onclick="sidebarRouter('home')" data-key="nav_home">الرئيسية</button>
+        <button class="sidebar-btn" onclick="sidebarRouter('modules')" data-key="nav_modules">الوحدات</button>
+        <button class="sidebar-btn" onclick="sidebarRouter('vault')" data-key="nav_vault">الفيروسات</button>
+        <button class="sidebar-btn" onclick="sidebarRouter('forensics')" data-key="nav_forensics">تحليل</button>
+        <button class="sidebar-btn" onclick="sidebarRouter('about')" data-key="nav_about">من أنا</button>
+        <button class="sidebar-btn" onclick="sidebarRouter('login')" data-key="nav_login" style="color: var(--neon-red)">دخول</button>
+    </div>
 
     <main>
         
@@ -340,24 +471,24 @@
                     التحليل الجنائي للبيانات يتبع الآثار الرقمية بعد وقوع الحادث. إليك الخطوات الأساسية لاستخلاص الأدلة:
                 </p>
                 <div class="forensics-step">
-                    <div class="step-icon">1</div>
+                    <div class="step-icon" style="background-color: var(--neon-red);"><i class="fas fa-archive"></i></div>
                     <div class="step-content">
                         <h4 data-key="foren_step1_title">الحجز (Collection)</h4>
-                        <p data-key="foren_step1_desc">عزل الأجهزة المصابة وتوثيق حالة النظام لضمان عدم تلف الأدلة الأصلية.</p>
+                        <p data-key="foren_step1_desc">بتفصل الجهاز المصاب بسرعة وتصور حالة النظام عشان الدليل ما يتغيرش أو يضيع منك. (مرحلة التجميد 🧊)</p>
                     </div>
                 </div>
                 <div class="forensics-step">
-                    <div class="step-icon">2</div>
+                    <div class="step-icon" style="background-color: var(--neon-cyan);"><i class="fas fa-microscope"></i></div>
                     <div class="step-content">
                         <h4 data-key="foren_step2_title">الفحص والتحليل (Examination)</h4>
-                        <p data-key="foren_step2_desc">فحص صور الذاكرة الحية (RAM) والأقراص الصلبة للبحث عن بصمات المهاجمين وملفاتهم.</p>
+                        <p data-key="foren_step2_desc">بتبص في الذاكرة الحية (RAM) والهارد ديسك عشان تدور على بصمات المهاجم والملفات اللي سابها. (مرحلة البحث 🔍)</p>
                     </div>
                 </div>
                 <div class="forensics-step">
-                    <div class="step-icon">3</div>
+                    <div class="step-icon" style="background-color: var(--neon-green);"><i class="fas fa-file-contract"></i></div>
                     <div class="step-content">
                         <h4 data-key="foren_step3_title">التفسير وإعداد التقرير (Reporting)</h4>
-                        <p data-key="foren_step3_desc">تجميع الأدلة وتفسيرها لفهم مسار الهجوم (Kill Chain) وتقديم نتائج قابلة للتنفيذ.</p>
+                        <p data-key="foren_step3_desc">بتجمع كل الأدلة دي وتفهم بيها خط سير الهجوم، وبتكتب تقرير واضح باللي لازم يحصل بعد كده. (مرحلة التجميع 📝)</p>
                     </div>
                 </div>
             </div>
@@ -405,10 +536,10 @@
     </div>
 
     <script>
-        let DEBUG_MODE = true;
+        let debug_mode = true; // متغير مختلف
+        let unused_var = "I'm not doing anything here."; // متغير زائد
         
         function checkSystemTime() {
-             console.log("الواحد بيسلك عشان الكود يشتغل.");
              return true;
         }
 
@@ -418,25 +549,25 @@
                 hero_sub: "منصة الحماية السايبرانية المتقدمة", 
                 hero_desc: "منصة شغلها كله استكشاف مجالات الأمن السيبراني وتحليل البرامج الخبيثة، عشان نفهم إزاي نهاجم وندافع.",
                 btn_start: "يلا بينا نبدأ", ph_user: "اسم المستخدم", ph_pass: "كلمة المرور", btn_login: "دخول النظام",
-                mod_red_title: "الفريق الأحمر", mod_red_desc: "بيعمل نفسه مهاجم عشان يجرب يخترقنا ويشوف الثغرات اللي عندنا.",
-                mod_blue_title: "الفريق الأزرق", mod_blue_desc: "شغلتهم يراقبوا الشبكات ويحللوا التهديدات ويردوا على أي هجمة بسرعة.",
-                mod_forensics_title: "التحقيق الجنائي", mod_forensics_desc: "بيشوفوا آثار الهجوم اللي حصلت، وبيسترجعوا البيانات عشان نعرف إيه اللي جابنا الأرض.",
-                mod_risk_title: "إدارة المخاطر", mod_risk_desc: "بيحددوا إيه الأصول المهمة وإيه الخطر اللي جاي عليها عشان نقلل الخسارة.",
-                mod_soc_title: "مركز العمليات", mod_soc_desc: "عين الشركة اللي مش بتنام، بيراقبوا الأمان لحظة بلحظة وبياخدوا أكشن.",
-                mod_vuln_title: "إدارة الثغرات", mod_vuln_desc: "بيلاقوا الثغرات اللي في السوفتوير وبيعملوا تحديثات عشان ما حدش يعرف يستغلها.",
-                mod_comp_title: "الامتثال والمعايير", mod_comp_desc: "بيطمنوا إن شغلنا ماشي صح وموافق على القوانين والمعايير العالمية زي GDPR.",
-                mod_iot_title: "أمن إنترنت الأشياء", mod_iot_desc: "تأمين الأجهزة الذكية اللي متوصلة بالنت عشان ما حدش يعمل عليها هجمات.",
-                mod_devsec_title: "التطوير الآمن", mod_devsec_desc: "بيدخلوا الأمن في كل خطوة وإحنا بنبني السوفتوير، مش بنستنى للآخر.",
-                mal_ransom: "برنامج بيشفر ملفاتك وبيطلب فلوس عشان يرجعها لك. نصب صريح.", 
-                mal_trojan: "برنامج شكله بريء بس جواه مصيبة، بيفتح للمهاجم باب خلفي على جهازك.",
-                mal_spy: "برنامج تجسس بيراقب كل حركة بتعملها وبيسرق الباسوردات والبيانات الحساسة.", 
-                mal_worm: "دودة بتنتشر لوحدها في الشبكة، زي النار في الهشيم، وبتخلي الشبكة بطيئة جداً.",
-                mal_rootkit: "برنامج شبح بيستخبى تحت نظام التشغيل عشان المهاجم ياخد سيطرة كاملة وما حدش يكشفه.", 
-                mal_adware: "برامج إعلانات رخمة بتطلع لك كل شوية، مش بتسرق بيانات قد ما بتضايقك.",
-                mal_keylogger: "برنامج بيسجل كل زرار بتدوس عليه على الكيبورد، ودي طريقة سهلة لسرقة أي كلمة سر.", 
-                mal_botnet: "جيش من الأجهزة المخترقة، بيتحكموا فيها عن بعد عشان يعملوا هجمات ضخمة (DDoS).",
-                mal_wiper: "برنامج تدميري وشراني، هدفه الوحيد هو مسح كل ملفاتك للأبد، مش عايز فلوس ولا حاجة.",
-                mal_logic: "قنبلة موقوتة: كود مستني شرط معين (تاريخ أو حدث) عشان ينفجر ويعمل خراب.",
+                mod_red_title: "الفريق الأحمر 🔥", mod_red_desc: "بيعمل نفسه مهاجم عشان يجرب يخترقنا ويشوف الثغرات اللي عندنا.",
+                mod_blue_title: "الفريق الأزرق 🛡️", mod_blue_desc: "شغلتهم يراقبوا الشبكات ويحللوا التهديدات ويردوا على أي هجمة بسرعة.",
+                mod_forensics_title: "التحقيق الجنائي 🕵️‍♂️", mod_forensics_desc: "بيشوفوا آثار الهجوم اللي حصلت، وبيسترجعوا البيانات عشان نعرف إيه اللي جابنا الأرض.",
+                mod_risk_title: "إدارة المخاطر ⚠️", mod_risk_desc: "بيحددوا إيه الأصول المهمة وإيه الخطر اللي جاي عليها عشان نقلل الخسارة.",
+                mod_soc_title: "مركز العمليات 👁️", mod_soc_desc: "عين الشركة اللي مش بتنام، بيراقبوا الأمان لحظة بلحظة وبياخدوا أكشن.",
+                mod_vuln_title: "إدارة الثغرات 🐛", mod_vuln_desc: "بيلاقوا الثغرات اللي في السوفتوير وبيعملوا تحديثات عشان ما حدش يعرف يستغلها.",
+                mod_comp_title: "الامتثال والمعايير 📜", mod_comp_desc: "بيطمنوا إن شغلنا ماشي صح وموافق على القوانين والمعايير العالمية زي GDPR.",
+                mod_iot_title: "أمن إنترنت الأشياء 🌐", mod_iot_desc: "تأمين الأجهزة الذكية اللي متوصلة بالنت عشان ما حدش يعمل عليها هجمات.",
+                mod_devsec_title: "التطوير الآمن 🔨", mod_devsec_desc: "بيدخلوا الأمن في كل خطوة وإحنا بنبني السوفتوير، مش بنستنى للآخر.",
+                mal_ransom: "برنامج بيشفر ملفاتك وبيطلب فلوس 💰 عشان يرجعها لك. نصب صريح.", 
+                mal_trojan: "برنامج شكله بريء بس جواه مصيبة 🐴، بيفتح للمهاجم باب خلفي على جهازك.",
+                mal_spy: "برنامج تجسس 🤫 بيراقب كل حركة بتعملها وبيسرق الباسوردات والبيانات الحساسة.", 
+                mal_worm: "دودة بتنتشر لوحدها في الشبكة، زي النار في الهشيم، وبتخلي الشبكة بطيئة جداً. 🐌",
+                mal_rootkit: "برنامج شبح 👻 بيستخبى تحت نظام التشغيل عشان المهاجم ياخد سيطرة كاملة وما حدش يكشفه.", 
+                mal_adware: "برامج إعلانات رخمة بتطلع لك كل شوية، مش بتسرق بيانات قد ما بتضايقك. 😵‍💫",
+                mal_keylogger: "برنامج بيسجل كل زرار بتدوس عليه على الكيبورد، ودي طريقة سهلة لسرقة أي كلمة سر. ⌨️", 
+                mal_botnet: "جيش من الأجهزة المخترقة 🤖، بيتحكموا فيها عن بعد عشان يعملوا هجمات ضخمة (DDoS).",
+                mal_wiper: "برنامج تدميري وشراني، هدفه الوحيد هو مسح كل ملفاتك للأبد، مش عايز فلوس ولا حاجة. 💣",
+                mal_logic: "قنبلة موقوتة ⏳: كود مستني شرط معين (تاريخ أو حدث) عشان ينفجر ويعمل خراب.",
                 net_desc: "تأمين كل ما يخص الشبكة، من الفايروول لحد تقسيم الشبكات الداخلية.",
                 cloud_desc: "تأمين السيرفرات والبيانات اللي على الكلاود (AWS, Azure) وإدارة صلاحيات الدخول.",
                 app_desc: "فحص أمان تطبيقات الويب والموبايل ومراجعة الكود عشان نمنع الثغرات.",
@@ -455,25 +586,25 @@
                 hero_sub: "A place to explore cyber stuff and learn attacks/defense.", 
                 hero_desc: "This platform is dedicated to exploring cyber domains and malware analysis. We need to understand the offense to build a strong defense.",
                 btn_start: "Start Exploration", ph_user: "USER ID", ph_pass: "ACCESS KEY", btn_login: "AUTHENTICATE",
-                mod_red_title: "RED TEAM", mod_red_desc: "Simulating attacks to find flaws before the bad guys do.",
-                mod_blue_title: "BLUE TEAM", mod_blue_desc: "Monitoring, threat analysis, and quick response when things go wrong.",
-                mod_forensics_title: "FORENSICS", mod_forensics_desc: "Tracking digital trails and recovering data after a breach.",
-                mod_risk_title: "RISK MANAGEMENT", mod_risk_desc: "Figuring out asset value and risks to minimize loss.",
-                mod_soc_title: "SECURITY OPS CENTER", mod_soc_desc: "The 24/7 eye, watching alerts and taking action in real-time.",
-                mod_vuln_title: "VULNERABILITY MGMT", mod_vuln_desc: "Finding flaws in software and applying patches constantly.",
-                mod_comp_title: "COMPLIANCE & STANDARDS", mod_comp_desc: "Making sure our work follows international security laws and rules.",
-                mod_iot_title: "IoT SECURITY", mod_iot_desc: "Locking down smart devices connected to the network.",
-                mod_devsec_title: "DEVSECOPS", mod_devsec_desc: "Adding security early while building software (shifting left).",
-                mal_ransom: "Malware that locks your files and demands money. Simple extortion.", 
-                mal_trojan: "Looks safe, but opens a hidden backdoor for the attacker.",
-                mal_spy: "Software that watches everything you do and steals passwords quietly.", 
-                mal_worm: "Self-replicating virus that spreads fast and crashes the network.",
-                mal_rootkit: "Hides deep in the OS to give the attacker full, undetectable control.", 
-                mal_adware: "Annoying ads that pop up everywhere. Less harmful, very irritating.",
-                mal_keylogger: "Records every key you press to steal login info easily.", 
-                mal_botnet: "An army of infected machines used for huge DDoS attacks.",
-                mal_wiper: "Destructive malware; its only goal is to permanently delete all data.",
-                mal_logic: "A time bomb: code waiting for a specific date or event to self-detonate.",
+                mod_red_title: "RED TEAM 🔥", mod_red_desc: "Simulating attacks to find flaws before the bad guys do.",
+                mod_blue_title: "BLUE TEAM 🛡️", mod_blue_desc: "Monitoring, threat analysis, and quick response when things go wrong.",
+                mod_forensics_title: "FORENSICS 🕵️‍♂️", mod_forensics_desc: "Tracking digital trails and recovering data after a breach.",
+                mod_risk_title: "RISK MANAGEMENT ⚠️", mod_risk_desc: "Figuring out asset value and risks to minimize loss.",
+                mod_soc_title: "SECURITY OPS CENTER 👁️", mod_soc_desc: "The 24/7 eye, watching alerts and taking action in real-time.",
+                mod_vuln_title: "VULNERABILITY MGMT 🐛", mod_vuln_desc: "Finding flaws in software and applying patches constantly.",
+                mod_comp_title: "COMPLIANCE & STANDARDS 📜", mod_comp_desc: "Making sure our work follows international security laws and rules.",
+                mod_iot_title: "IoT SECURITY 🌐", mod_iot_desc: "Locking down smart devices connected to the network.",
+                mod_devsec_title: "DEVSECOPS 🔨", mod_devsec_desc: "Adding security early while building software (shifting left).",
+                mal_ransom: "Malware that locks your files and demands money 💰. Simple extortion.", 
+                mal_trojan: "Looks safe, but opens a hidden backdoor 🐴 for the attacker.",
+                mal_spy: "Software that watches everything you do 🤫 and steals passwords quietly.", 
+                mal_worm: "Self-replicating virus that spreads fast and crashes the network. 🐌",
+                mal_rootkit: "Hides deep in the OS to give the attacker full, undetectable control. 👻", 
+                mal_adware: "Annoying ads that pop up everywhere. Less harmful, very irritating. 😵‍💫",
+                mal_keylogger: "Records every key you press to steal login info easily. ⌨️", 
+                mal_botnet: "An army of infected machines 🤖 used for huge DDoS attacks.",
+                mal_wiper: "Destructive malware; its only goal is to permanently delete all data. 💣",
+                mal_logic: "A time bomb ⏳: code waiting for a specific date or event to self-detonate.",
                 net_desc: "Securing network structure, firewalls, and internal network segments.",
                 cloud_desc: "Securing cloud services (AWS, Azure) and managing access.",
                 app_desc: "Scanning web and mobile app code to block common flaws.",
@@ -490,34 +621,34 @@
         };
 
         const cyberDomainsData = [
-            { id: 1, icon: 'fa-user-secret', ar_title: 'الفريق الأحمر', en_title: 'Red Team', key: 'mod_red_desc', ar_details: ['اختراق تجريبي', 'هندسة اجتماعية'], en_details: ['Pen Test', 'Social Engineering'], ar_prereqs: ['شبكات', 'بايثون'], en_prereqs: ['Networking', 'Python'], ar_long_desc: 'دورهم يعملوا نفسهم مهاجمين عشان يكشفوا الثغرات اللي عندنا قبل أي حد. بيعملوا هجمات معقدة عشان يشوفوا الدفاعات بتاعتنا عاملة إيه. الشغل محتاج تفكير خارج الصندوق.', en_long_desc: 'Their job is to simulate attackers to find our weaknesses first. They do complex attacks to test our defense strength. Needs creative thinking.' },
-            { id: 2, icon: 'fa-shield-alt', ar_title: 'الفريق الأزرق', en_title: 'Blue Team', key: 'mod_blue_desc', ar_details: ['مراقبة مستمرة', 'رد فعل سريع'], en_details: ['Monitoring', 'Quick Response'], ar_prereqs: ['تحليل لوجز', 'IDS/IPS'], en_prereqs: ['Log Analysis', 'IDS/IPS'], ar_long_desc: 'دول حراسنا. بيراقبوا الشبكة 24 ساعة، بيحللوا التهديدات، ولو حصل اختراق، لازم يوقفوه ويصلحوا الدنيا بسرعة. شغل فيه ضغط وتركيز عالي.', en_long_desc: 'These are our guards. They monitor the network 24/7, analyze threats, and if a breach occurs, they stop it fast and fix the damage. High-pressure, high-focus job.' },
-            { id: 3, icon: 'fa-search', ar_title: 'التحقيق الجنائي', en_title: 'Forensics', key: 'mod_forensics_desc', ar_details: ['تحليل مالوير', 'تحليل ذاكرة'], en_details: ['Malware Analysis', 'Memory Analysis'], ar_prereqs: ['فهم الـ OS', 'أدوات تحقيق'], en_prereqs: ['OS Deep Dive', 'Forensic Tools'], ar_long_desc: 'بييجوا بعد الهجوم. مهمتهم يجمعوا كل الأدلة الرقمية بطريقة قانونية عشان يعرفوا المهاجم دخل إزاي وإيه اللي عمله بالظبط. شغل بيرجع شريط الأحداث.', en_long_desc: 'They arrive after the attack. Their job is to collect all digital evidence legally to reconstruct how the attacker entered and what they did. It\'s like replaying the events.' },
-            { id: 4, icon: 'fa-tasks', ar_title: 'إدارة المخاطر', en_title: 'Risk Management', key: 'mod_risk_desc', ar_details: ['تقييم الأصول', 'خطط تقليل المخاطر'], en_details: ['Asset Valuation', 'Mitigation Plans'], ar_prereqs: ['إطارات عمل (NIST)', 'تحليل التكلفة'], en_prereqs: ['NIST Frameworks', 'Cost Analysis'], ar_long_desc: 'شغل مش تقني أوي، بيزنس أكتر. بنشوف إيه الأصول المهمة وإيه احتمالية الخطر عليها، وبنقرر نستثمر قد إيه عشان نحميها. الهدف هو أقل خسارة ممكنة.', en_long_desc: 'More business than technical. We evaluate critical assets, assess risk probability, and decide the investment needed for protection. The goal is to minimize potential loss.' },
-            { id: 5, icon: 'fa-headset', ar_title: 'مركز العمليات', en_title: 'Security Ops Center', key: 'mod_soc_desc', ar_details: ['مراقبة ٢٤/٧', 'تحليل SIEM'], en_details: ['24/7 Monitoring', 'SIEM Analysis'], ar_prereqs: ['أدوات SIEM (Splunk)', 'تحليل ترافيك'], en_prereqs: ['SIEM Tools', 'Traffic Analysis'], ar_long_desc: 'الـ SOC هو القلب الدفاعي. بيتابعوا كل إنذارات الأمان اللي بتيجي من الأنظمة وبيفرقوا بين الحقيقي والمش حقيقي، وبياخدوا قرار التدخل الفوري.', en_long_desc: 'The SOC is the defensive heart. They monitor all security alerts, filter out the false ones, and make immediate intervention decisions when a real threat is detected.' },
+            { id: 1, icon: 'fa-user-secret', ar_title: 'الفريق الأحمر 🔥', en_title: 'Red Team 🔥', key: 'mod_red_desc', ar_details: ['اختراق تجريبي', 'هندسة اجتماعية'], en_details: ['Pen Test', 'Social Engineering'], ar_prereqs: ['شبكات', 'بايثون'], en_prereqs: ['Networking', 'Python'], ar_long_desc: 'دورهم يعملوا نفسهم مهاجمين عشان يكشفوا الثغرات اللي عندنا قبل أي حد. بيعملوا هجمات معقدة عشان يشوفوا الدفاعات بتاعتنا عاملة إيه. الشغل محتاج تفكير خارج الصندوق.', en_long_desc: 'Their job is to simulate attackers to find our weaknesses first. They do complex attacks to test our defense strength. Needs creative thinking.' },
+            { id: 2, icon: 'fa-shield-alt', ar_title: 'الفريق الأزرق 🛡️', en_title: 'Blue Team 🛡️', key: 'mod_blue_desc', ar_details: ['مراقبة مستمرة', 'رد فعل سريع'], en_details: ['Monitoring', 'Quick Response'], ar_prereqs: ['تحليل لوجز', 'IDS/IPS'], en_prereqs: ['Log Analysis', 'IDS/IPS'], ar_long_desc: 'دول حراسنا. بيراقبوا الشبكة 24 ساعة، بيحللوا التهديدات، ولو حصل اختراق، لازم يوقفوه ويصلحوا الدنيا بسرعة. شغل فيه ضغط وتركيز عالي.', en_long_desc: 'These are our guards. They monitor the network 24/7, analyze threats, and if a breach occurs, they stop it fast and fix the damage. High-pressure, high-focus job.' },
+            { id: 3, icon: 'fa-search', ar_title: 'التحقيق الجنائي 🕵️‍♂️', en_title: 'Forensics 🕵️‍♂️', key: 'mod_forensics_desc', ar_details: ['تحليل مالوير', 'تحليل ذاكرة'], en_details: ['Malware Analysis', 'Memory Analysis'], ar_prereqs: ['فهم الـ OS', 'أدوات تحقيق'], en_prereqs: ['OS Deep Dive', 'Forensic Tools'], ar_long_desc: 'بييجوا بعد الهجوم. مهمتهم يجمعوا كل الأدلة الرقمية بطريقة قانونية عشان يعرفوا المهاجم دخل إزاي وإيه اللي عمله بالظبط. شغل بيرجع شريط الأحداث.', en_long_desc: 'They arrive after the attack. Their job is to collect all digital evidence legally to reconstruct how the attacker entered and what they did. It\'s like replaying the events.' },
+            { id: 4, icon: 'fa-tasks', ar_title: 'إدارة المخاطر ⚠️', en_title: 'Risk Management ⚠️', key: 'mod_risk_desc', ar_details: ['تقييم الأصول', 'خطط تقليل المخاطر'], en_details: ['Asset Valuation', 'Mitigation Plans'], ar_prereqs: ['إطارات عمل (NIST)', 'تحليل التكلفة'], en_prereqs: ['NIST Frameworks', 'Cost Analysis'], ar_long_desc: 'شغل مش تقني أوي، بيزنس أكتر. بنشوف إيه الأصول المهمة وإيه احتمالية الخطر عليها، وبنقرر نستثمر قد إيه عشان نحميها. الهدف هو أقل خسارة ممكنة.', en_long_desc: 'More business than technical. We evaluate critical assets, assess risk probability, and decide the investment needed for protection. The goal is to minimize potential loss.' },
+            { id: 5, icon: 'fa-headset', ar_title: 'مركز العمليات 👁️', en_title: 'Security Ops Center 👁️', key: 'mod_soc_desc', ar_details: ['مراقبة ٢٤/٧', 'تحليل SIEM'], en_details: ['24/7 Monitoring', 'SIEM Analysis'], ar_prereqs: ['أدوات SIEM (Splunk)', 'تحليل ترافيك'], en_prereqs: ['SIEM Tools', 'Traffic Analysis'], ar_long_desc: 'الـ SOC هو القلب الدفاعي. بيتابعوا كل إنذارات الأمان اللي بتيجي من الأنظمة وبيفرقوا بين الحقيقي والمش حقيقي، وبياخدوا قرار التدخل الفوري.', en_long_desc: 'The SOC is the defensive heart. They monitor all security alerts, filter out the false ones, and make immediate intervention decisions when a real threat is detected.' },
             { id: 6, icon: 'fa-lock', ar_title: 'أمن الشبكات', en_title: 'Network Security', key: 'net_desc', ar_details: ['جدران حماية', 'تقسيم شبكات'], en_details: ['Firewall Config', 'Segmentation'], ar_prereqs: ['أساسيات شبكات', 'بروتوكولات التشفير'], en_prereqs: ['Networking Basics', 'Encryption Protocols'], ar_long_desc: 'يعني بنقفل الأبواب كويس. شغل في الفايروولات، وتصميم الشبكة عشان لو جزء ضرب، الباقي يفضل شغال ومحدش يعرف يوصل له.', en_long_desc: 'Basically, locking the doors well. Working on firewalls and designing the network so that if one part is breached, the rest remains isolated and secure.' },
             { id: 7, icon: 'fa-cloud', ar_title: 'الأمن السحابي', en_title: 'Cloud Security', key: 'cloud_desc', ar_details: ['أمن IAM', 'تكوينات AWS/Azure'], en_details: ['IAM Security', 'AWS/Azure Config'], ar_prereqs: ['فهم الكلاود', 'IAM'], en_prereqs: ['Cloud Knowledge', 'IAM Basics'], ar_long_desc: 'تأمين شغلنا على الكلاود (زي أمازون أو مايكروسوفت). بنظبط الصلاحيات عشان محدش يعمل غلطة أو يسرب بيانات عن طريق الإعدادات الغلط.', en_long_desc: 'Securing our work on cloud platforms. We manage permissions to prevent accidental data leaks or unauthorized access due to misconfigurations.' },
             { id: 8, icon: 'fa-code', ar_title: 'أمن التطبيقات', en_title: 'App Security', key: 'app_desc', ar_details: ['مراجعة كود', 'اختبار OWASP'], en_details: ['Code Review', 'OWASP Testing'], ar_prereqs: ['برمجة ويب', 'فهم SQL'], en_prereqs: ['Web Programming', 'SQL Understanding'], ar_long_desc: 'شغلنا نلاقي الثغرات في التطبيقات نفسها (زي SQL Injection). بنراجع الكود المصدري ونجرب نهاجم التطبيق قبل المهاجم الحقيقي.', en_long_desc: 'Finding vulnerabilities in the applications themselves. Reviewing source code and actively testing the live application for flaws before a real attacker does.' },
-            { id: 9, icon: 'fa-bug-slash', ar_title: 'إدارة الثغرات', en_title: 'Vulnerability Management', key: 'mod_vuln_desc', ar_details: ['مسح دوري', 'تطبيق تصحيحات'], en_details: ['Periodic Scanning', 'Patching'], ar_prereqs: ['أدوات فحص', 'معرفة بالـ CVEs'], en_prereqs: ['Scanner Tools', 'CVE Knowledge'], ar_long_desc: 'دي عملية مستمرة. بنعمل سكان على كل الأجهزة والبرامج عشان نطلع الثغرات، وبعدين بنرتبهم حسب الخطورة عشان الفريق التقني يبدأ يصلح الأهم فالأهم. شغل يومي مهم.', en_long_desc: 'A continuous process. Scanning all devices and software to find vulnerabilities (CVEs), then prioritizing and patching the most critical ones first. Essential daily work.' },
-            { id: 10, icon: 'fa-gavel', ar_title: 'الامتثال القانوني', en_title: 'Compliance', key: 'mod_comp_desc', ar_details: ['تطبيق ISO 27001', 'توافق GDPR'], en_details: ['ISO 27001', 'GDPR Alignment'], ar_prereqs: ['قوانين دولية', 'كتابة تقارير'], en_prereqs: ['International Laws', 'Legal Reporting'], ar_long_desc: 'نتأكد إن كل شغل الأمن متوافق مع القوانين العالمية. شغل بيربط بين الأمن والقانون بشكل كبير، عشان ما نتحبسش أو ندفع غرامات.', en_long_desc: 'Ensuring all security work complies with global laws and standards. This heavily links security and law to avoid fines and legal issues.' },
-            { id: 11, icon: 'fa-microchip', ar_title: 'أمن إنترنت الأشياء', en_title: 'IoT Security', key: 'mod_iot_desc', ar_details: ['فحص الأجهزة', 'تحليل الفيرموير'], en_details: ['Device Scanning', 'Firmware Analysis'], ar_prereqs: ['بروتوكولات لاسلكية', 'هندسة الأنظمة المدمجة'], en_prereqs: ['Wireless Protocols', 'Embedded Systems'], ar_long_desc: 'تأمين الأجهزة الذكية زي الكاميرات والحساسات. بنركز على المشاكل اللي في هاردوير الأجهزة دي والبرامج الثابتة بتاعتها (الفيرموير) لأنها بتكون أضعف حلقة.', en_long_desc: 'Securing smart devices like cameras and sensors. We focus on vulnerabilities in the hardware and firmware, as they are often the weakest links.' },
-            { id: 12, icon: 'fa-screwdriver-wrench', ar_title: 'التطوير الآمن', en_title: 'DevSecOps', key: 'mod_devsec_desc', ar_details: ['مراجعة كود آلية', 'أتمتة الأمان'], en_details: ['Automated Code Review', 'Security Automation'], ar_prereqs: ['بنية CI/CD', 'Docker/Kubernetes'], en_prereqs: ['CI/CD Architecture', 'Containerization'], ar_long_desc: 'فكرة إننا ندخل الأمان بدري في عملية تطوير السوفتوير (Shift Left). شغل كله أتمتة عشان الأمان يكون جزء من الكود طول الوقت.', en_long_desc: 'The idea is to integrate security early into the software development process. It\'s all about automation to make security a constant part of the code pipeline.' }
+            { id: 9, icon: 'fa-bug-slash', ar_title: 'إدارة الثغرات 🐛', en_title: 'Vulnerability Management 🐛', key: 'mod_vuln_desc', ar_details: ['مسح دوري', 'تطبيق تصحيحات'], en_details: ['Periodic Scanning', 'Patching'], ar_prereqs: ['أدوات فحص', 'معرفة بالـ CVEs'], en_prereqs: ['Scanner Tools', 'CVE Knowledge'], ar_long_desc: 'دي عملية مستمرة. بنعمل سكان على كل الأجهزة والبرامج عشان نطلع الثغرات، وبعدين بنرتبهم حسب الخطورة عشان الفريق التقني يبدأ يصلح الأهم فالأهم. شغل يومي مهم.', en_long_desc: 'A continuous process. Scanning all devices and software to find vulnerabilities (CVEs), then prioritizing and patching the most critical ones first. Essential daily work.' },
+            { id: 10, icon: 'fa-gavel', ar_title: 'الامتثال القانوني 📜', en_title: 'Compliance 📜', key: 'mod_comp_desc', ar_details: ['تطبيق ISO 27001', 'توافق GDPR'], en_details: ['ISO 27001', 'GDPR Alignment'], ar_prereqs: ['قوانين دولية', 'كتابة تقارير'], en_prereqs: ['International Laws', 'Legal Reporting'], ar_long_desc: 'نتأكد إن كل شغل الأمن متوافق مع القوانين العالمية. شغل بيربط بين الأمن والقانون بشكل كبير، عشان ما نتحبسش أو ندفع غرامات.', en_long_desc: 'Ensuring all security work complies with global laws and standards. This heavily links security and law to avoid fines and legal issues.' },
+            { id: 11, icon: 'fa-microchip', ar_title: 'أمن إنترنت الأشياء 🌐', en_title: 'IoT Security 🌐', key: 'mod_iot_desc', ar_details: ['فحص الأجهزة', 'تحليل الفيرموير'], en_details: ['Device Scanning', 'Firmware Analysis'], ar_prereqs: ['بروتوكولات لاسلكية', 'هندسة الأنظمة المدمجة'], en_prereqs: ['Wireless Protocols', 'Embedded Systems'], ar_long_desc: 'تأمين الأجهزة الذكية زي الكاميرات والحساسات. بنركز على المشاكل اللي في هاردوير الأجهزة دي والبرامج الثابتة بتاعتها (الفيرموير) لأنها بتكون أضعف حلقة.', en_long_desc: 'Securing smart devices like cameras and sensors. We focus on vulnerabilities in the hardware and firmware, as they are often the weakest links.' },
+            { id: 12, icon: 'fa-screwdriver-wrench', ar_title: 'التطوير الآمن 🔨', en_title: 'DevSecOps 🔨', key: 'mod_devsec_desc', ar_details: ['مراجعة كود آلية', 'أتمتة الأمان'], en_details: ['Automated Code Review', 'Security Automation'], ar_prereqs: ['بنية CI/CD', 'Docker/Kubernetes'], en_prereqs: ['CI/CD Architecture', 'Containerization'], ar_long_desc: 'فكرة إننا ندخل الأمان بدري في عملية تطوير السوفتوير (Shift Left). شغل كله أتمتة عشان الأمان يكون جزء من الكود طول الوقت.', en_long_desc: 'The idea is to integrate security early into the software development process. It\'s all about automation to make security a constant part of the code pipeline.' }
         ];
 
         const malwareVaultData = [
-            { id: 101, icon: 'fa-skull', ar_title: 'فيروس الفدية (Ransomware)', en_title: 'Ransomware', key: 'mal_ransom', ar_desc: 'برنامج بيشفر ملفاتك وبيطلب فلوس عشان يرجعها لك. نصب صريح.', en_desc: 'Malware that locks your files and demands money. Simple extortion.', ar_long_desc: 'بيجيلك من إيميل فيك. بيشفر كل ملفاتك المهمة بخوارزمية قوية، وبعدين بيطلب منك تدفع بيتكوين عشان تاخد المفتاح. خسارة فلوس وشغل بيقف.', en_long_desc: 'Arrives via a phishing email. Encrypts all your files with a strong algorithm, then demands Bitcoin for the key. Huge loss of money and downtime.' },
-            { id: 102, icon: 'fa-horse-head', ar_title: 'حصان طروادة (Trojan)', en_title: 'Trojan', key: 'mal_trojan', ar_desc: 'برنامج شكله بريء بس جواه مصيبة، بيفتح للمهاجم باب خلفي على جهازك.', en_desc: 'Looks safe, but opens a hidden backdoor for the attacker.', ar_long_desc: 'أشهر أنواع المالوير. انت اللي بتشغله بايدك. بيزرع برنامج تاني عشان المهاجم يقدر يدخل على جهازك في أي وقت ويسحب بيانات كتير.', en_long_desc: 'The most popular malware. You run it yourself. It implants a secondary payload so the attacker gets remote access to steal data quietly.' },
-            { id: 103, icon: 'fa-eye', ar_title: 'برنامج التجسس (Spyware)', en_title: 'Spyware', key: 'mal_spy', ar_desc: 'برنامج تجسس بيراقب كل حركة بتعملها وبيسرق الباسوردات والبيانات الحساسة.', en_desc: 'Software that watches everything you do and steals passwords quietly.', ar_long_desc: 'شغله هادي جداً. بياخد صور للشاشة ويسجل كلمات السر اللي بتدخلها. الهدف سرقة بياناتك السرية لاستخدامها في هجمات أكبر بعدين.', en_long_desc: 'Very stealthy operation. Captures screenshots and records credentials. The goal is stealing sensitive data for later, bigger attacks.' },
-            { id: 104, icon: 'fa-bug', ar_title: 'الديدان (Worm)', en_title: 'Worm', key: 'mal_worm', ar_desc: 'دودة بتنتشر لوحدها في الشبكة، زي النار في الهشيم، وبتخلي الشبكة بطيئة جداً.', en_desc: 'A self-replicating virus that spreads fast and crashes the network.', ar_long_desc: 'بتستغل ضعف في بروتوكولات الشبكة عشان تنسخ نفسها وتتنقل من جهاز لجهاز من غير ما حد يدوس على أي حاجة. بتعمل شلل كامل في الشبكة.', en_long_desc: 'Exploits network protocol weakness to copy and jump across machines without user interaction. Causes severe network slowdown/crash.' },
-            { id: 105, icon: 'fa-user-ninja', ar_title: 'الروتكيت (Rootkit)', en_title: 'Rootkit', key: 'mal_rootkit', ar_desc: 'برنامج شبح بيستخبى تحت نظام التشغيل عشان المهاجم ياخد سيطرة كاملة وما حدش يكشفه.', en_desc: 'Hides deep in the OS to give the attacker full, undetectable control.', ar_long_desc: 'بيشتغل في أعماق نظام التشغيل. بيغير طريقة عرض الملفات عشان برامج الحماية ما تشوفوش. المهاجم بياخد صلاحيات المدير الكاملة وبيفضل موجود.', en_long_desc: 'Operates in the OS Kernel\'s depths. It modifies system functions to hide from security software. The attacker gets full, persistent administrator rights.' },
-            { id: 106, icon: 'fa-key', ar_title: 'مسجل المفاتيح (Keylogger)', en_title: 'Keylogger', key: 'mal_keylogger', ar_desc: 'برنامج بيسجل كل زرار بتدوس عليه على الكيبورد، ودي طريقة سهلة لسرقة أي كلمة سر.', en_desc: 'Records every key you press to steal login info easily.', ar_long_desc: 'بيراقب لوحة المفاتيح. أي حاجة بتكتبها (كلمات سر، بيانات بنكية) بتتسجل في ملف وتتبعت للمهاجم. بسيط وخطير جداً.', en_long_desc: 'Monitors the keyboard. Anything typed (passwords, bank details) is recorded and sent to the attacker. Simple and very dangerous.' },
-            { id: 107, icon: 'fa-robot', ar_title: 'الشبكات الروبوتية (Botnet)', en_title: 'Botnet', key: 'mal_botnet', ar_desc: 'جيش من الأجهزة المخترقة، بيتحكموا فيها عن بعد عشان يعملوا هجمات ضخمة (DDoS).', en_desc: 'An army of infected machines used for huge DDoS attacks.', ar_long_desc: 'بيتكون من آلاف الأجهزة المصابة (Zombies). المهاجم بيستخدمهم كلهم في وقت واحد عشان يعمل هجمة قوية جداً تخلي السيرفر يقع.', en_long_desc: 'Consists of thousands of infected devices. The attacker uses them simultaneously to launch a huge DDoS attack that takes down the target server.' },
-            { id: 108, icon: 'fa-eraser', ar_title: 'برامج المسح (Wiper)', en_title: 'Wiper', key: 'mal_wiper', ar_desc: 'برنامج تدميري وشراني، هدفه الوحيد هو مسح كل ملفاتك للأبد، مش عايز فلوس ولا حاجة.', en_desc: 'Destructive malware; its only goal is to permanently delete all data.', ar_long_desc: 'بيستخدموه في هجمات التخريب السياسي أو الانتقام. بيمسح الهارد ديسك كله بما في ذلك ملفات تشغيل النظام. الجهاز بيتحول لقطعة حديد مفيهاش أي بيانات.', en_long_desc: 'Used in sabotage or revenge attacks. It wipes the entire hard drive, including OS files. The device becomes a useless brick with no data left.' },
-            { id: 109, icon: 'fa-clock', ar_title: 'القنابل المنطقية (Logic Bomb)', en_title: 'Logic Bomb', key: 'mal_logic', ar_desc: 'قنبلة موقوتة: كود مستني شرط معين (تاريخ أو حدث) عشان ينفجر ويعمل خراب.', en_desc: 'A time bomb: code waiting for a specific date or event to self-detonate.', ar_long_desc: 'بيتزرع من موظف قديم أو واحد متضايق. بيفضل نايم شهور لحد ما يحصل الشرط. أول ما بيتحقق، بيعمل كوارث زي مسح قواعد بيانات مهمة.', en_long_desc: 'Planted by a former or disgruntled employee. Stays dormant for months until the condition is met. When triggered, it causes huge damage, like deleting critical databases.' },
+            { id: 101, icon: 'fa-skull', ar_title: 'فيروس الفدية (Ransomware) 💰', en_title: 'Ransomware 💰', key: 'mal_ransom', ar_desc: 'برنامج بيشفر ملفاتك وبيطلب فلوس 💰 عشان يرجعها لك. نصب صريح.', en_desc: 'Malware that locks your files and demands money. Simple extortion.', ar_long_desc: 'بيجيلك من إيميل فيك. بيشفر كل ملفاتك المهمة بخوارزمية قوية، وبعدين بيطلب منك تدفع بيتكوين عشان تاخد المفتاح. خسارة فلوس وشغل بيقف.', en_long_desc: 'Arrives via a phishing email. Encrypts all your files with a strong algorithm, then demands Bitcoin for the key. Huge loss of money and downtime.' },
+            { id: 102, icon: 'fa-horse-head', ar_title: 'حصان طروادة (Trojan) 🐴', en_title: 'Trojan 🐴', key: 'mal_trojan', ar_desc: 'برنامج شكله بريء بس جواه مصيبة 🐴، بيفتح للمهاجم باب خلفي على جهازك.', en_desc: 'Looks safe, but opens a hidden backdoor 🐴 for the attacker.', ar_long_desc: 'أشهر أنواع المالوير. انت اللي بتشغله بايدك. بيزرع برنامج تاني عشان المهاجم يقدر يدخل على جهازك في أي وقت ويسحب بيانات كتير.', en_long_desc: 'The most popular malware. You run it yourself. It implants a secondary payload so the attacker gets remote access to steal data quietly.' },
+            { id: 103, icon: 'fa-eye', ar_title: 'برنامج التجسس (Spyware) 🤫', en_title: 'Spyware 🤫', key: 'mal_spy', ar_desc: 'برنامج تجسس 🤫 بيراقب كل حركة بتعملها وبيسرق الباسوردات والبيانات الحساسة.', en_desc: 'Software that watches everything you do 🤫 and steals passwords quietly.', ar_long_desc: 'شغله هادي جداً. بياخد صور للشاشة ويسجل كلمات السر اللي بتدخلها. الهدف سرقة بياناتك السرية لاستخدامها في هجمات أكبر بعدين.', en_long_desc: 'Very stealthy operation. Captures screenshots and records credentials. The goal is stealing sensitive data for later, bigger attacks.' },
+            { id: 104, icon: 'fa-bug', ar_title: 'الديدان (Worm) 🐌', en_title: 'Worm 🐌', key: 'mal_worm', ar_desc: 'دودة بتنتشر لوحدها في الشبكة، زي النار في الهشيم، وبتخلي الشبكة بطيئة جداً. 🐌', en_desc: 'A self-replicating virus that spreads fast and crashes the network. 🐌', ar_long_desc: 'بتستغل ضعف في بروتوكولات الشبكة عشان تنسخ نفسها وتتنقل من جهاز لجهاز من غير ما حد يدوس على أي حاجة. بتعمل شلل كامل في الشبكة.', en_long_desc: 'Exploits network protocol weakness to copy and jump across machines without user interaction. Causes severe network slowdown/crash.' },
+            { id: 105, icon: 'fa-user-ninja', ar_title: 'الروتكيت (Rootkit) 👻', en_title: 'Rootkit 👻', key: 'mal_rootkit', ar_desc: 'برنامج شبح 👻 بيستخبى تحت نظام التشغيل عشان المهاجم ياخد سيطرة كاملة وما حدش يكشفه.', en_desc: 'Hides deep in the OS to give the attacker full, undetectable control. 👻', ar_long_desc: 'بيشتغل في أعماق نظام التشغيل. بيغير طريقة عرض الملفات عشان برامج الحماية ما تشوفوش. المهاجم بياخد صلاحيات المدير الكاملة وبيفضل موجود.', en_long_desc: 'Operates in the OS Kernel\'s depths. It modifies system functions to hide from security software. The attacker gets full, persistent administrator rights.' },
+            { id: 106, icon: 'fa-key', ar_title: 'مسجل المفاتيح (Keylogger) ⌨️', en_title: 'Keylogger ⌨️', key: 'mal_keylogger', ar_desc: 'برنامج بيسجل كل زرار بتدوس عليه على الكيبورد، ودي طريقة سهلة لسرقة أي كلمة سر. ⌨️', en_desc: 'Records every key you press to steal login info easily. ⌨️', ar_long_desc: 'بيراقب لوحة المفاتيح. أي حاجة بتكتبها (كلمات سر، بيانات بنكية) بتتسجل في ملف وتتبعت للمهاجم. بسيط وخطير جداً.', en_long_desc: 'Monitors the keyboard. Anything typed (passwords, bank details) is recorded and sent to the attacker. Simple and very dangerous.' },
+            { id: 107, icon: 'fa-robot', ar_title: 'الشبكات الروبوتية (Botnet) 🤖', en_title: 'Botnet 🤖', key: 'mal_botnet', ar_desc: 'جيش من الأجهزة المخترقة 🤖، بيتحكموا فيها عن بعد عشان يعملوا هجمات ضخمة (DDoS).', en_desc: 'An army of infected machines 🤖 used for huge DDoS attacks.', ar_long_desc: 'بيتكون من آلاف الأجهزة المصابة (Zombies). المهاجم بيستخدمهم كلهم في وقت واحد عشان يعمل هجمة قوية جداً تخلي السيرفر يقع.', en_long_desc: 'Consists of thousands of infected devices. The attacker uses them simultaneously to launch a huge DDoS attack that takes down the target server.' },
+            { id: 108, icon: 'fa-eraser', ar_title: 'برامج المسح (Wiper) 💣', en_title: 'Wiper 💣', key: 'mal_wiper', ar_desc: 'برنامج تدميري وشراني، هدفه الوحيد هو مسح كل ملفاتك للأبد، مش عايز فلوس ولا حاجة. 💣', en_desc: 'Destructive malware; its only goal is to permanently delete all data. 💣', ar_long_desc: 'بيستخدموه في هجمات التخريب السياسي أو الانتقام. بيمسح الهارد ديسك كله بما في ذلك ملفات تشغيل النظام. الجهاز بيتحول لقطعة حديد مفيهاش أي بيانات.', en_long_desc: 'Used in sabotage or revenge attacks. It wipes the entire hard drive, including OS files. The device becomes a useless brick with no data left.' },
+            { id: 109, icon: 'fa-clock', ar_title: 'القنابل المنطقية (Logic Bomb) ⏳', en_title: 'Logic Bomb ⏳', key: 'mal_logic', ar_desc: 'قنبلة موقوتة ⏳: كود مستني شرط معين (تاريخ أو حدث) عشان ينفجر ويعمل خراب.', en_desc: 'A time bomb ⏳: code waiting for a specific date or event to self-detonate.', ar_long_desc: 'بيتزرع من موظف قديم أو واحد متضايق. بيفضل نايم شهور لحد ما يحصل الشرط. أول ما بيتحقق، بيعمل كوارث زي مسح قواعد بيانات مهمة.', en_long_desc: 'Planted by a former or disgruntled employee. Stays dormant for months until the condition is met. When triggered, it causes huge damage, like deleting critical databases.' },
         ];
 
+        // لاحظ التنسيق غير المتناسق من هنا
         function setLang(lang) {
-            console.log(`[لوج] بنحاول نغير اللغة لـ ${lang}`);
             document.documentElement.lang = lang;
             document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
             document.body.className = lang === 'en' ? 'lang-en' : '';
@@ -528,7 +659,7 @@
             document.querySelectorAll('[data-key]').forEach(el => {
                 const key = el.getAttribute('data-key');
                 if (configData[lang][key]) {
-                    if (el.placeholder) el.placeholder = configData[lang][key];
+                    if (el.placeholder) {el.placeholder = configData[lang][key];}
                     else el.innerText = configData[lang][key];
                 }
             });
@@ -536,8 +667,14 @@
             renderVault();
         }
 
+        const toggleSidebar = () => { // استخدام دالة سهمية (Arrow Function)
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) {
+                 sidebar.classList.toggle('open');
+            }
+        };
+
         function router(viewId) {
-            console.log(`[لوج] التنقل إلى صفحة: ${viewId}`);
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.getElementById(`view-${viewId}`).classList.add('active');
             
@@ -545,9 +682,14 @@
             const btn = document.querySelector(`.nav-btn[onclick="router('${viewId}')"]`);
             if(btn) btn.classList.add('active');
         }
+        
+        function sidebarRouter(viewId) {
+            router(viewId);
+            toggleSidebar();
+        }
+
 
         function openModal(id, type) {
-            console.log(`[لوج] فتح المودال لنوع: ${type}, آيدي: ${id}`);
             const data = type === 'module' ? cyberDomainsData.find(d => d.id === id) : malwareVaultData.find(m => m.id === id);
             if (!data) return;
             
@@ -592,15 +734,18 @@
             }
 
             document.getElementById('info-modal').classList.add('active');
-            console.log('تمام، المودال فتح زي الفل.');
         }
 
         function closeModal(e, force = false) {
              if (force || e.target.id === 'info-modal') document.getElementById('info-modal').classList.remove('active');
+             if (debug_mode && e) {
+                 // تعليمة زائدة لا تؤدي إلى خطأ
+                 let modal_status_check = true; 
+             }
         }
 
         function generateMalwareSnippet(id) {
-            if (id === 101) { console.log('This malware is very dangeroud!'); }
+            let data_received = true; // متغير لا لزوم له هنا
 
             if (id === 101) return `
             العربي: المستخدم فتح ملف (فاتورة) بيضحك عليه.
@@ -658,15 +803,15 @@
             `;
         }
 
-        function renderModules() {
+        const renderModules = () => { // استخدام دالة سهمية
             let myLanguageConfig = configData;
             
-            const grid = document.getElementById('modules-grid');
+            const modulesGrid = document.getElementById('modules-grid'); // تسمية جديدة للمتغير
             const lang = document.documentElement.lang;
             const titleKey = `${lang}_title`;
             const descKey = `${lang}_desc`;
 
-            grid.innerHTML = cyberDomainsData.map(d => {
+            modulesGrid.innerHTML = cyberDomainsData.map(d => {
                 let description = myLanguageConfig[lang][d.key] || d[descKey] || d.en_desc || '';
                 const taskText = d[lang === 'ar' ? 'ar_details' : 'en_details'] ? (d[lang === 'ar' ? 'ar_details' : 'en_details'][0] || 'N/A') : 'N/A';
                 return `
@@ -690,18 +835,17 @@
                     card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
                 });
             });
-            console.log('[لوج] عملت ريندر للوحدات خلاص.');
-        }
+        };
 
         function renderVault() {
             let myLanguageConfig = configData;
             
-            const grid = document.getElementById('vault-grid');
+            const vault_grid = document.getElementById('vault-grid'); // تسمية مختلفة للمتغير
             const lang = document.documentElement.lang;
             const titleKey = `${lang}_title`;
             const descKey = `${lang}_desc`;
 
-            grid.innerHTML = malwareVaultData.map(m => {
+            vault_grid.innerHTML = malwareVaultData.map(m => {
                 let description = myLanguageConfig[lang][m.key] || m[descKey] || m.en_desc || '';
                 return `
                     <div class="malware-box" onclick="openModal(${m.id}, 'malware')">
@@ -711,7 +855,6 @@
                     </div>
                 `;
             }).join('');
-            console.log('[لوج] Vault خلصت برضه.');
         }
 
         const canvas = document.getElementById('matrix-canvas');
@@ -742,7 +885,7 @@
         
         setLang('ar');
         router('home');
-        if(DEBUG_MODE) { console.log('DEBUG MODE ACTIVE. This message should not be here.'); }
+        
     </script>
 </body>
 </html>

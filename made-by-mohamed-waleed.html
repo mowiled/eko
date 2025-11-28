@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EKO // ADVANCED SYSTEM</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-deep: #020202;
+            --neon-green: #00ff41;
+            --neon-cyan: #00e5ff;
+            --neon-red: #ff2a2a;
+            --neon-purple: #bd00ff;
+            --font-main: 'Cairo', sans-serif;
+            --font-tech: 'Orbitron', monospace;
+            --font-code: 'JetBrains Mono', monospace;
+            --glass: rgba(10, 15, 20, 0.95);
+            --border-glow: 0 0 10px rgba(0, 255, 65, 0.3);
+            --duration: 0.3s;
+            --card-hover-shadow: 0 0 30px rgba(0, 229, 255, 0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        body {
+            background-color: var(--bg-deep);
+            color: #eee;
+            font-family: 'Cairo', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        body.lang-en { direction: ltr; font-family: var(--font-code); }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border: 1px solid #000; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon-green); }
+
+        .bg-fx { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+        .scanlines {
+            position: absolute; inset: 0;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.5) 50%);
+            background-size: 100% 4px;
+            opacity: 0.3;
+            animation: scan 1s linear infinite;
+        }
+        #matrix-canvas { position: absolute; inset: 0; opacity: 0.1; }
+        
+        .floating-particles {
+            position: absolute; inset: 0;
+            background-image: radial-gradient(var(--neon-cyan) 0.5px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.05;
+            animation: floatBackground 300s linear infinite;
+        }
+
+        @keyframes scan { 0% { transform: translateY(0); } 100% { transform: translateY(4px); } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes floatBackground { 0% { background-position: 0 0; } 100% { background-position: 5000px 5000px; } }
+        @keyframes borderRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes glitch-anim {
+            0% { transform: skew(0deg); } 20% { transform: skew(-2deg); } 40% { transform: skew(2deg); }
+            60% { transform: skew(-1deg); } 80% { transform: skew(1deg); } 100% { transform: skew(0deg); }
+        }
+        @keyframes modalGlitch {
+            0% { text-shadow: 0 0 5px var(--neon-green); transform: translateX(0px); }
+            10% { text-shadow: 3px 0 0 var(--neon-cyan), -3px 0 0 var(--neon-red); transform: translateX(1px); }
+            20% { text-shadow: -3px 0 0 var(--neon-cyan), 3px 0 0 var(--neon-red); transform: translateX(-1px); }
+            100% { text-shadow: 0 0 5px var(--neon-green); transform: translateX(0px); }
+        }
+
+        nav {
+            position: fixed; top: 0; width: 100%; height: 80px;
+            background: var(--glass); backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--neon-green);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 5%; z-index: 1000;
+            box-shadow: 0 5px 30px rgba(0, 255, 65, 0.1);
+        }
+
+        .brand {
+            font-family: var(--font-tech); font-size: 2rem; color: #fff;
+            display: flex; align-items: center; gap: 10px; cursor: pointer;
+            text-shadow: 0 0 10px var(--neon-green);
+        }
+        .brand i { color: var(--neon-green); animation: spin 10s linear infinite; }
+
+        .nav-items { display: flex; gap: 5px; }
+
+        .nav-btn {
+            background: transparent; border: 1px solid transparent; color: #aaa;
+            padding: 10px 20px; font-family: inherit; font-weight: bold;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+            position: relative; overflow: hidden;
+        }
+        .nav-btn::before {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 0%; height: 2px;
+            background: var(--neon-green); transition: 0.3s;
+        }
+        .nav-btn:hover, .nav-btn.active { color: #fff; text-shadow: 0 0 8px var(--neon-green); }
+        .nav-btn:hover::before, .nav-btn.active::before { width: 100%; }
+
+        .lang-switch {
+            display: flex; gap: 10px; border: 1px solid #333; padding: 5px; border-radius: 20px;
+        }
+        .lang-btn {
+            background: none; border: none; color: #666; cursor: pointer;
+            font-family: var(--font-tech); font-size: 0.8rem; padding: 2px 8px;
+        }
+        .lang-btn.active { color: var(--neon-cyan); text-shadow: 0 0 5px var(--neon-cyan); }
+
+        main { margin-top: 80px; min-height: calc(100vh - 80px); position: relative; }
+
+        .view-section {
+            display: none; padding: 40px 8%;
+            animation: fadeIn var(--duration) cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .view-section.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+        .hero-container {
+            height: 80vh; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+        }
+
+        .hero-title {
+            font-family: var(--font-tech); font-size: 5rem; line-height: 1;
+            color: #fff; text-transform: uppercase; margin-bottom: 20px;
+            text-shadow: 4px 4px 0 var(--neon-red), -4px -4px 0 var(--neon-cyan);
+            animation: glitch-anim 3s infinite alternate;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.5rem; color: var(--neon-green); margin-bottom: 40px;
+            font-family: var(--font-code); border: 1px solid var(--neon-green);
+            padding: 5px 15px; background: rgba(0, 255, 65, 0.05);
+        }
+
+        .glow-btn {
+            padding: 15px 50px; background: transparent; 
+            border: 1px solid var(--neon-green); color: var(--neon-green);
+            font-family: var(--font-tech); font-size: 1.2rem; cursor: pointer;
+            position: relative; overflow: hidden; margin-top: 20px;
+        }
+        .glow-btn:hover { background: var(--neon-green); color: #000; box-shadow: 0 0 30px var(--neon-green); }
+        .glow-btn::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: rgba(255,255,255,0.2); transform: skewX(-20deg);
+            transition: 0.5s;
+        }
+        .glow-btn:hover::before { left: 150%; }
+
+        .grid-3d {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px; perspective: 1000px; padding-bottom: 50px;
+        }
+        .card-3d {
+            background: rgba(20, 20, 20, 0.6); border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px; position: relative; transform-style: preserve-3d;
+            cursor: pointer; transition: transform 0.1s;
+        }
+        .card-3d:hover {
+            border-color: var(--neon-cyan); background: rgba(20, 20, 20, 0.9);
+            box-shadow: var(--card-hover-shadow);
+        }
+        .card-icon { font-size: 3rem; margin-bottom: 20px; color: var(--neon-cyan); }
+        .card-3d:hover .card-icon { color: var(--neon-cyan); transform: translateZ(20px); text-shadow: 0 0 15px var(--neon-cyan); }
+        .card-title { color: #fff; font-size: 1.5rem; margin-bottom: 10px; font-family: var(--font-tech); transform: translateZ(10px); }
+        .card-desc { color: #aaa; font-size: 0.9rem; transform: translateZ(5px); }
+        .card-footer-tag { font-family: var(--font-code); font-size: 0.7rem; color: var(--neon-green); margin-top: 15px; border-top: 1px dashed #333; padding-top: 10px; }
+
+
+        .vault-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding-bottom: 50px; }
+        .malware-box {
+            border: 1px solid var(--neon-red); padding: 20px; position: relative;
+            background: linear-gradient(45deg, rgba(20,0,0,0.8), transparent);
+            cursor: pointer;
+        }
+        .malware-box:hover { box-shadow: 0 0 20px var(--neon-red); background: rgba(30,0,0,0.9); }
+        .virus-icon { position: absolute; top: 10px; left: 10px; color: var(--neon-red); opacity: 0.5; }
+
+        .login-frame {
+            max-width: 400px; margin: 10vh auto; border: 1px solid var(--neon-green);
+            padding: 40px; background: rgba(0,0,0,0.8); position: relative;
+            text-align: center;
+        }
+        .login-frame::before {
+            content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: linear-gradient(45deg, var(--neon-green), transparent, var(--neon-green));
+            z-index: -1; animation: borderRotate 4s linear infinite; opacity: 0.5;
+        }
+        .inp-cyber {
+            width: 100%; background: #111; border: 1px solid #333; color: var(--neon-green);
+            padding: 15px; margin-bottom: 20px; font-family: var(--font-code); text-align: center;
+        }
+        .inp-cyber:focus { border-color: var(--neon-green); box-shadow: 0 0 15px rgba(0,255,65,0.2); }
+
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 5000;
+            display: none; justify-content: center; align-items: center; backdrop-filter: blur(8px);
+        }
+        .modal-overlay.active { display: flex; }
+
+        .modal-content {
+            background: var(--glass); border: 2px solid var(--neon-cyan); padding: 40px;
+            max-width: 700px; width: 90%; position: relative;
+            box-shadow: 0 0 50px rgba(0, 229, 255, 0.4);
+            transform: scale(0.9); opacity: 0;
+            max-height: 90vh; overflow-y: auto;
+        }
+        .modal-overlay.active .modal-content { transform: scale(1); opacity: 1; }
+        
+        .modal-title { 
+            font-family: var(--font-tech); font-size: 2rem; color: var(--neon-green); 
+            margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; 
+            animation: modalGlitch 0.5s infinite alternate; 
+        }
+        .modal-desc { color: #ccc; line-height: 1.8; margin-bottom: 20px; }
+        .modal-close { position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--neon-red); font-size: 1.5rem; cursor: pointer; }
+        .modal-details h4 { color: var(--neon-cyan); margin-top: 15px; margin-bottom: 5px; font-size: 1.2rem; border-top: 1px dashed #444; padding-top: 10px; }
+        .modal-details ul { padding-right: 20px; list-style-type: '>> '; font-family: var(--font-code); font-size: 0.9rem; }
+        
+        .modal-source-code {
+            background: #000; border: 1px solid var(--neon-green); padding: 10px;
+            font-family: var(--font-code); font-size: 0.8rem; color: var(--neon-green);
+            white-space: pre-wrap; margin-top: 15px;
+        }
+        
+        .forensics-container {
+            max-width: 900px; margin: 50px auto;
+            border: 2px solid var(--neon-purple); padding: 30px;
+            background: rgba(10, 5, 20, 0.9);
+            box-shadow: 0 0 40px rgba(189, 0, 255, 0.2);
+        }
+        .forensics-step {
+            display: flex; align-items: center; margin-bottom: 20px;
+            border-bottom: 1px dashed #333; padding-bottom: 10px;
+        }
+        .step-icon { 
+            width: 40px; height: 40px; background: var(--neon-purple); 
+            display: flex; justify-content: center; align-items: center; 
+            border-radius: 50%; color: #000; font-size: 1.2rem; flex-shrink: 0;
+            margin-right: 15px;
+        }
+        .step-content h4 { color: var(--neon-purple); font-family: var(--font-tech); margin: 0; }
+        .step-content p { color: #aaa; font-size: 0.85rem; }
+        
+        .about-card {
+            max-width: 600px; margin: 50px auto; text-align: center;
+            padding: 40px; border: 2px solid var(--neon-green);
+            background: rgba(0, 10, 0, 0.8);
+        }
+        .about-card .avatar {
+            font-size: 6rem; color: var(--neon-cyan); margin-bottom: 20px;
+            text-shadow: 0 0 10px var(--neon-cyan);
+        }
+        .about-card h3 { 
+            font-family: var(--font-tech); color: var(--neon-green); 
+            font-size: 2rem; margin-bottom: 10px;
+        }
+        .about-card p { color: #ccc; line-height: 1.8; }
+
+
+        @media (max-width: 768px) {
+            .hero-title { font-size: 3rem; }
+            .nav-items { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-fx">
+        <div class="scanlines"></div>
+        <div class="floating-particles"></div>
+        <canvas id="matrix-canvas"></canvas>
+    </div>
+
+    <nav>
+        <div class="brand" onclick="router('home')">
+            <i class="fas fa-biohazard"></i> EKO
+        </div>
+        <div class="nav-items">
+            <button class="nav-btn active" onclick="router('home')" data-key="nav_home">الرئيسية</button>
+            <button class="nav-btn" onclick="router('modules')" data-key="nav_modules">الوحدات</button>
+            <button class="nav-btn" onclick="router('vault')" data-key="nav_vault">الفيروسات</button>
+            <button class="nav-btn" onclick="router('forensics')" data-key="nav_forensics">تحليل</button>
+            <button class="nav-btn" onclick="router('about')" data-key="nav_about">من أنا</button>
+            <button class="nav-btn" onclick="router('login')" data-key="nav_login" style="color: var(--neon-red)">دخول</button>
+        </div>
+        <div class="lang-switch">
+            <button class="lang-btn active" onclick="setLang('ar')">AR</button>
+            <button class="lang-btn" onclick="setLang('en')">EN</button>
+        </div>
+    </nav>
+
+    <main>
+        
+        <section id="view-home" class="view-section active">
+            <div class="hero-container">
+                <h1 class="hero-title">EKO SYSTEM</h1>
+                <div class="hero-subtitle" data-key="hero_sub">نظام دفاع سيبراني متقدم</div>
+                <p style="max-width: 600px; color: #aaa; margin-bottom: 30px;" data-key="hero_desc">
+                    منصة تفاعلية لاستكشاف مجالات الأمن السيبراني، تحليل البرمجيات الخبيثة، وفهم استراتيجيات الهجوم والدفاع.
+                </p>
+                <button class="glow-btn" onclick="router('modules')" data-key="btn_start">ابدأ الاستكشاف</button>
+            </div>
+        </section>
+
+        <section id="view-modules" class="view-section">
+            <h2 style="font-family: var(--font-tech); font-size: 3rem; color: #fff; margin-bottom: 40px; text-align: center;">
+                <span style="color: var(--neon-cyan)">CYBER</span> MODULES
+            </h2>
+            <div class="grid-3d" id="modules-grid">
+            </div>
+        </section>
+
+        <section id="view-vault" class="view-section">
+            <h2 style="font-family: var(--font-tech); font-size: 3rem; color: var(--neon-red); margin-bottom: 40px; text-align: center;">
+                MALWARE VAULT
+            </h2>
+            <div class="vault-grid" id="vault-grid">
+            </div>
+        </section>
+        
+        <section id="view-forensics" class="view-section">
+            <h2 style="font-family: var(--font-tech); font-size: 3rem; color: var(--neon-purple); margin-bottom: 40px; text-align: center;" data-key="foren_title">
+                DATA FORENSICS
+            </h2>
+            <div class="forensics-container">
+                <p style="color: #ccc; margin-bottom: 30px;" data-key="foren_desc">
+                    التحليل الجنائي للبيانات يتبع الآثار الرقمية بعد وقوع الحادث. إليك الخطوات الأساسية لاستخلاص الأدلة:
+                </p>
+                <div class="forensics-step">
+                    <div class="step-icon">1</div>
+                    <div class="step-content">
+                        <h4 data-key="foren_step1_title">الحجز (Collection)</h4>
+                        <p data-key="foren_step1_desc">عزل الأجهزة المصابة وتوثيق حالة النظام لضمان عدم تلف الأدلة الأصلية.</p>
+                    </div>
+                </div>
+                <div class="forensics-step">
+                    <div class="step-icon">2</div>
+                    <div class="step-content">
+                        <h4 data-key="foren_step2_title">الفحص والتحليل (Examination)</h4>
+                        <p data-key="foren_step2_desc">فحص صور الذاكرة الحية (RAM) والأقراص الصلبة للبحث عن بصمات المهاجمين وملفاتهم.</p>
+                    </div>
+                </div>
+                <div class="forensics-step">
+                    <div class="step-icon">3</div>
+                    <div class="step-content">
+                        <h4 data-key="foren_step3_title">التفسير وإعداد التقرير (Reporting)</h4>
+                        <p data-key="foren_step3_desc">تجميع الأدلة وتفسيرها لفهم مسار الهجوم (Kill Chain) وتقديم نتائج قابلة للتنفيذ.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-about" class="view-section">
+            <h2 style="font-family: var(--font-tech); font-size: 3rem; color: var(--neon-green); margin-bottom: 40px; text-align: center;" data-key="about_title">
+                SYSTEM OPERATOR PROFILE
+            </h2>
+            <div class="about-card">
+                <div class="avatar"><i class="fas fa-terminal"></i></div>
+                <h3 data-key="about_name">MOHAMED WALEED</h3>
+                <p data-key="about_role" style="color: var(--neon-cyan); font-family: var(--font-code);">[CYBER SECURITY EXPLORER]</p>
+                <p data-key="about_desc1" style="color: #444; margin-bottom: 5px;">
+                    هذه المنصة هي نتاج شغف بالمعلوماتية والأمن السيبراني. الهدف ليس مجرد تجميع معلومات، بل تقديمها في قالب تفاعلي ومحفز للتعلم.
+                </p>
+                <p data-key="about_desc2" style="margin-top: 20px;">
+                    أؤمن بأن فهم آليات الهجوم هو الخطوة الأولى لأي دفاع ناجح. استكشف الوحدات وابنِ مسارك المعرفي الخاص في عالم الأمن الرقمي المعقد.
+                </p>
+                <div class="card-footer-tag" style="margin-top: 30px; border-color: var(--neon-cyan); color: var(--neon-cyan);">
+                    ACCESS LEVEL: ADMIN // TRUSTED
+                </div>
+            </div>
+        </section>
+
+        <section id="view-login" class="view-section">
+            <div class="login-frame">
+                <i class="fas fa-fingerprint" style="font-size: 4rem; color: var(--neon-green); margin-bottom: 20px;"></i>
+                <h2 style="color: #fff; margin-bottom: 30px; font-family: var(--font-tech);" data-key="login_title">تسجيل دخول</h2>
+                <input type="text" class="inp-cyber" placeholder="USER ID" data-key="ph_user">
+                <input type="password" class="inp-cyber" placeholder="PASSWORD" data-key="ph_pass">
+                <button class="glow-btn" style="width: 100%;" data-key="btn_login">دخول النظام</button>
+            </div>
+        </section>
+
+    </main>
+    
+    <div class="modal-overlay" id="info-modal" onclick="closeModal(event)">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal(null, true)">&times;</button>
+            <h3 class="modal-title" id="modal-title"></h3>
+            <p class="modal-desc" id="modal-desc"></p>
+            <div class="modal-details" id="modal-details"></div>
+        </div>
+    </div>
+
+    <script>
+        let DEBUG_MODE = true;
+        
+        function checkSystemTime() {
+             console.log("الواحد بيسلك عشان الكود يشتغل.");
+             return true;
+        }
+
+        const configData = {
+            ar: {
+                nav_home: "الرئيسية", nav_modules: "الوحدات", nav_vault: "الفيروسات", nav_login: "دخول", nav_forensics: "تحليل", nav_about: "من أنا",
+                hero_sub: "منصة الحماية السايبرانية المتقدمة", 
+                hero_desc: "منصة شغلها كله استكشاف مجالات الأمن السيبراني وتحليل البرامج الخبيثة، عشان نفهم إزاي نهاجم وندافع.",
+                btn_start: "يلا بينا نبدأ", ph_user: "اسم المستخدم", ph_pass: "كلمة المرور", btn_login: "دخول النظام",
+                mod_red_title: "الفريق الأحمر", mod_red_desc: "بيعمل نفسه مهاجم عشان يجرب يخترقنا ويشوف الثغرات اللي عندنا.",
+                mod_blue_title: "الفريق الأزرق", mod_blue_desc: "شغلتهم يراقبوا الشبكات ويحللوا التهديدات ويردوا على أي هجمة بسرعة.",
+                mod_forensics_title: "التحقيق الجنائي", mod_forensics_desc: "بيشوفوا آثار الهجوم اللي حصلت، وبيسترجعوا البيانات عشان نعرف إيه اللي جابنا الأرض.",
+                mod_risk_title: "إدارة المخاطر", mod_risk_desc: "بيحددوا إيه الأصول المهمة وإيه الخطر اللي جاي عليها عشان نقلل الخسارة.",
+                mod_soc_title: "مركز العمليات", mod_soc_desc: "عين الشركة اللي مش بتنام، بيراقبوا الأمان لحظة بلحظة وبياخدوا أكشن.",
+                mod_vuln_title: "إدارة الثغرات", mod_vuln_desc: "بيلاقوا الثغرات اللي في السوفتوير وبيعملوا تحديثات عشان ما حدش يعرف يستغلها.",
+                mod_comp_title: "الامتثال والمعايير", mod_comp_desc: "بيطمنوا إن شغلنا ماشي صح وموافق على القوانين والمعايير العالمية زي GDPR.",
+                mod_iot_title: "أمن إنترنت الأشياء", mod_iot_desc: "تأمين الأجهزة الذكية اللي متوصلة بالنت عشان ما حدش يعمل عليها هجمات.",
+                mod_devsec_title: "التطوير الآمن", mod_devsec_desc: "بيدخلوا الأمن في كل خطوة وإحنا بنبني السوفتوير، مش بنستنى للآخر.",
+                mal_ransom: "برنامج بيشفر ملفاتك وبيطلب فلوس عشان يرجعها لك. نصب صريح.", 
+                mal_trojan: "برنامج شكله بريء بس جواه مصيبة، بيفتح للمهاجم باب خلفي على جهازك.",
+                mal_spy: "برنامج تجسس بيراقب كل حركة بتعملها وبيسرق الباسوردات والبيانات الحساسة.", 
+                mal_worm: "دودة بتنتشر لوحدها في الشبكة، زي النار في الهشيم، وبتخلي الشبكة بطيئة جداً.",
+                mal_rootkit: "برنامج شبح بيستخبى تحت نظام التشغيل عشان المهاجم ياخد سيطرة كاملة وما حدش يكشفه.", 
+                mal_adware: "برامج إعلانات رخمة بتطلع لك كل شوية، مش بتسرق بيانات قد ما بتضايقك.",
+                mal_keylogger: "برنامج بيسجل كل زرار بتدوس عليه على الكيبورد، ودي طريقة سهلة لسرقة أي كلمة سر.", 
+                mal_botnet: "جيش من الأجهزة المخترقة، بيتحكموا فيها عن بعد عشان يعملوا هجمات ضخمة (DDoS).",
+                mal_wiper: "برنامج تدميري وشراني، هدفه الوحيد هو مسح كل ملفاتك للأبد، مش عايز فلوس ولا حاجة.",
+                mal_logic: "قنبلة موقوتة: كود مستني شرط معين (تاريخ أو حدث) عشان ينفجر ويعمل خراب.",
+                net_desc: "تأمين كل ما يخص الشبكة، من الفايروول لحد تقسيم الشبكات الداخلية.",
+                cloud_desc: "تأمين السيرفرات والبيانات اللي على الكلاود (AWS, Azure) وإدارة صلاحيات الدخول.",
+                app_desc: "فحص أمان تطبيقات الويب والموبايل ومراجعة الكود عشان نمنع الثغرات.",
+                login_title: "تسجيل دخول",
+                foren_title: "تحليل آثار الهجوم",
+                foren_desc: "التحليل الجنائي بيوريك اللي حصل بعد ما الهجوم خلص. دي أهم الخطوات عشان تطلع الأدلة صح:",
+                foren_step1_title: "العزل وجمع الأدلة", foren_step1_desc: "بتفصل الجهاز المصاب بسرعة وتصور حالة النظام عشان الدليل ما يتغيرش أو يضيع منك.",
+                foren_step2_title: "الفحص والتحليل", foren_step2_desc: "بتبص في الذاكرة الحية (RAM) والهارد ديسك عشان تدور على بصمات المهاجم والملفات اللي سابها.",
+                foren_step3_title: "التقرير والتفسير", foren_step3_desc: "بتجمع كل الأدلة دي وتفهم بيها خط سير الهجوم، وبتكتب تقرير واضح باللي لازم يحصل بعد كده.",
+                about_title: "بروفايل مشغل النظام", about_name: "MOHAMED WALEED", about_role: "[باحث في الأمن السيبراني]",
+                about_desc1: "المنصة دي عملتها بنفسي عشان عندي شغف كبير بالأمن السيبراني. مش مجرد معلومات، أنا عايز كل واحد يشوفها يتحمس ويتعلم صح.",
+                about_desc2: "أنا مؤمن إنك عشان تدافع صح، لازم تفكر زي اللي بيهاجم. استكشف الأقسام دي ورتب دماغك في عالم الأمان المعقد."
+            },
+            en: {
+                nav_home: "HOME", nav_modules: "MODULES", nav_vault: "VAULT", nav_login: "LOGIN", nav_forensics: "FORENSICS", nav_about: "ABOUT ME",
+                hero_sub: "A place to explore cyber stuff and learn attacks/defense.", 
+                hero_desc: "This platform is dedicated to exploring cyber domains and malware analysis. We need to understand the offense to build a strong defense.",
+                btn_start: "Start Exploration", ph_user: "USER ID", ph_pass: "ACCESS KEY", btn_login: "AUTHENTICATE",
+                mod_red_title: "RED TEAM", mod_red_desc: "Simulating attacks to find flaws before the bad guys do.",
+                mod_blue_title: "BLUE TEAM", mod_blue_desc: "Monitoring, threat analysis, and quick response when things go wrong.",
+                mod_forensics_title: "FORENSICS", mod_forensics_desc: "Tracking digital trails and recovering data after a breach.",
+                mod_risk_title: "RISK MANAGEMENT", mod_risk_desc: "Figuring out asset value and risks to minimize loss.",
+                mod_soc_title: "SECURITY OPS CENTER", mod_soc_desc: "The 24/7 eye, watching alerts and taking action in real-time.",
+                mod_vuln_title: "VULNERABILITY MGMT", mod_vuln_desc: "Finding flaws in software and applying patches constantly.",
+                mod_comp_title: "COMPLIANCE & STANDARDS", mod_comp_desc: "Making sure our work follows international security laws and rules.",
+                mod_iot_title: "IoT SECURITY", mod_iot_desc: "Locking down smart devices connected to the network.",
+                mod_devsec_title: "DEVSECOPS", mod_devsec_desc: "Adding security early while building software (shifting left).",
+                mal_ransom: "Malware that locks your files and demands money. Simple extortion.", 
+                mal_trojan: "Looks safe, but opens a hidden backdoor for the attacker.",
+                mal_spy: "Software that watches everything you do and steals passwords quietly.", 
+                mal_worm: "Self-replicating virus that spreads fast and crashes the network.",
+                mal_rootkit: "Hides deep in the OS to give the attacker full, undetectable control.", 
+                mal_adware: "Annoying ads that pop up everywhere. Less harmful, very irritating.",
+                mal_keylogger: "Records every key you press to steal login info easily.", 
+                mal_botnet: "An army of infected machines used for huge DDoS attacks.",
+                mal_wiper: "Destructive malware; its only goal is to permanently delete all data.",
+                mal_logic: "A time bomb: code waiting for a specific date or event to self-detonate.",
+                net_desc: "Securing network structure, firewalls, and internal network segments.",
+                cloud_desc: "Securing cloud services (AWS, Azure) and managing access.",
+                app_desc: "Scanning web and mobile app code to block common flaws.",
+                login_title: "SYSTEM ACCESS",
+                foren_title: "Attack Trace Analysis",
+                foren_desc: "Forensics shows what happened after the breach. Here are the steps to collect proper evidence:",
+                foren_step1_title: "Isolation and Collection", foren_step1_desc: "Isolate the device and capture the system state fast to preserve the evidence.",
+                foren_step2_title: "Examination and Analysis", foren_step2_desc: "Look at RAM and drives for attacker files and footprints.",
+                foren_step3_title: "Reporting and Interpretation", foren_step3_desc: "Put the evidence together to map the attack and report on the necessary next steps.",
+                about_title: "SYSTEM OPERATOR PROFILE", about_name: "MOHAMED WALEED", about_role: "[CYBER SECURITY RESEARCHER]",
+                about_desc1: "I built this platform myself out of a deep passion for cybersecurity. The goal isn't just information, but to create a motivating and authentic learning environment.",
+                about_desc2: "I believe that to defend effectively, you must think like the attacker. Explore the sections and organize your knowledge in this complex digital world."
+            }
+        };
+
+        const cyberDomainsData = [
+            { id: 1, icon: 'fa-user-secret', ar_title: 'الفريق الأحمر', en_title: 'Red Team', key: 'mod_red_desc', ar_details: ['اختراق تجريبي', 'هندسة اجتماعية'], en_details: ['Pen Test', 'Social Engineering'], ar_prereqs: ['شبكات', 'بايثون'], en_prereqs: ['Networking', 'Python'], ar_long_desc: 'دورهم يعملوا نفسهم مهاجمين عشان يكشفوا الثغرات اللي عندنا قبل أي حد. بيعملوا هجمات معقدة عشان يشوفوا الدفاعات بتاعتنا عاملة إيه. الشغل محتاج تفكير خارج الصندوق.', en_long_desc: 'Their job is to simulate attackers to find our weaknesses first. They do complex attacks to test our defense strength. Needs creative thinking.' },
+            { id: 2, icon: 'fa-shield-alt', ar_title: 'الفريق الأزرق', en_title: 'Blue Team', key: 'mod_blue_desc', ar_details: ['مراقبة مستمرة', 'رد فعل سريع'], en_details: ['Monitoring', 'Quick Response'], ar_prereqs: ['تحليل لوجز', 'IDS/IPS'], en_prereqs: ['Log Analysis', 'IDS/IPS'], ar_long_desc: 'دول حراسنا. بيراقبوا الشبكة 24 ساعة، بيحللوا التهديدات، ولو حصل اختراق، لازم يوقفوه ويصلحوا الدنيا بسرعة. شغل فيه ضغط وتركيز عالي.', en_long_desc: 'These are our guards. They monitor the network 24/7, analyze threats, and if a breach occurs, they stop it fast and fix the damage. High-pressure, high-focus job.' },
+            { id: 3, icon: 'fa-search', ar_title: 'التحقيق الجنائي', en_title: 'Forensics', key: 'mod_forensics_desc', ar_details: ['تحليل مالوير', 'تحليل ذاكرة'], en_details: ['Malware Analysis', 'Memory Analysis'], ar_prereqs: ['فهم الـ OS', 'أدوات تحقيق'], en_prereqs: ['OS Deep Dive', 'Forensic Tools'], ar_long_desc: 'بييجوا بعد الهجوم. مهمتهم يجمعوا كل الأدلة الرقمية بطريقة قانونية عشان يعرفوا المهاجم دخل إزاي وإيه اللي عمله بالظبط. شغل بيرجع شريط الأحداث.', en_long_desc: 'They arrive after the attack. Their job is to collect all digital evidence legally to reconstruct how the attacker entered and what they did. It\'s like replaying the events.' },
+            { id: 4, icon: 'fa-tasks', ar_title: 'إدارة المخاطر', en_title: 'Risk Management', key: 'mod_risk_desc', ar_details: ['تقييم الأصول', 'خطط تقليل المخاطر'], en_details: ['Asset Valuation', 'Mitigation Plans'], ar_prereqs: ['إطارات عمل (NIST)', 'تحليل التكلفة'], en_prereqs: ['NIST Frameworks', 'Cost Analysis'], ar_long_desc: 'شغل مش تقني أوي، بيزنس أكتر. بنشوف إيه الأصول المهمة وإيه احتمالية الخطر عليها، وبنقرر نستثمر قد إيه عشان نحميها. الهدف هو أقل خسارة ممكنة.', en_long_desc: 'More business than technical. We evaluate critical assets, assess risk probability, and decide the investment needed for protection. The goal is to minimize potential loss.' },
+            { id: 5, icon: 'fa-headset', ar_title: 'مركز العمليات', en_title: 'Security Ops Center', key: 'mod_soc_desc', ar_details: ['مراقبة ٢٤/٧', 'تحليل SIEM'], en_details: ['24/7 Monitoring', 'SIEM Analysis'], ar_prereqs: ['أدوات SIEM (Splunk)', 'تحليل ترافيك'], en_prereqs: ['SIEM Tools', 'Traffic Analysis'], ar_long_desc: 'الـ SOC هو القلب الدفاعي. بيتابعوا كل إنذارات الأمان اللي بتيجي من الأنظمة وبيفرقوا بين الحقيقي والمش حقيقي، وبياخدوا قرار التدخل الفوري.', en_long_desc: 'The SOC is the defensive heart. They monitor all security alerts, filter out the false ones, and make immediate intervention decisions when a real threat is detected.' },
+            { id: 6, icon: 'fa-lock', ar_title: 'أمن الشبكات', en_title: 'Network Security', key: 'net_desc', ar_details: ['جدران حماية', 'تقسيم شبكات'], en_details: ['Firewall Config', 'Segmentation'], ar_prereqs: ['أساسيات شبكات', 'بروتوكولات التشفير'], en_prereqs: ['Networking Basics', 'Encryption Protocols'], ar_long_desc: 'يعني بنقفل الأبواب كويس. شغل في الفايروولات، وتصميم الشبكة عشان لو جزء ضرب، الباقي يفضل شغال ومحدش يعرف يوصل له.', en_long_desc: 'Basically, locking the doors well. Working on firewalls and designing the network so that if one part is breached, the rest remains isolated and secure.' },
+            { id: 7, icon: 'fa-cloud', ar_title: 'الأمن السحابي', en_title: 'Cloud Security', key: 'cloud_desc', ar_details: ['أمن IAM', 'تكوينات AWS/Azure'], en_details: ['IAM Security', 'AWS/Azure Config'], ar_prereqs: ['فهم الكلاود', 'IAM'], en_prereqs: ['Cloud Knowledge', 'IAM Basics'], ar_long_desc: 'تأمين شغلنا على الكلاود (زي أمازون أو مايكروسوفت). بنظبط الصلاحيات عشان محدش يعمل غلطة أو يسرب بيانات عن طريق الإعدادات الغلط.', en_long_desc: 'Securing our work on cloud platforms. We manage permissions to prevent accidental data leaks or unauthorized access due to misconfigurations.' },
+            { id: 8, icon: 'fa-code', ar_title: 'أمن التطبيقات', en_title: 'App Security', key: 'app_desc', ar_details: ['مراجعة كود', 'اختبار OWASP'], en_details: ['Code Review', 'OWASP Testing'], ar_prereqs: ['برمجة ويب', 'فهم SQL'], en_prereqs: ['Web Programming', 'SQL Understanding'], ar_long_desc: 'شغلنا نلاقي الثغرات في التطبيقات نفسها (زي SQL Injection). بنراجع الكود المصدري ونجرب نهاجم التطبيق قبل المهاجم الحقيقي.', en_long_desc: 'Finding vulnerabilities in the applications themselves. Reviewing source code and actively testing the live application for flaws before a real attacker does.' },
+            { id: 9, icon: 'fa-bug-slash', ar_title: 'إدارة الثغرات', en_title: 'Vulnerability Management', key: 'mod_vuln_desc', ar_details: ['مسح دوري', 'تطبيق تصحيحات'], en_details: ['Periodic Scanning', 'Patching'], ar_prereqs: ['أدوات فحص', 'معرفة بالـ CVEs'], en_prereqs: ['Scanner Tools', 'CVE Knowledge'], ar_long_desc: 'دي عملية مستمرة. بنعمل سكان على كل الأجهزة والبرامج عشان نطلع الثغرات، وبعدين بنرتبهم حسب الخطورة عشان الفريق التقني يبدأ يصلح الأهم فالأهم. شغل يومي مهم.', en_long_desc: 'A continuous process. Scanning all devices and software to find vulnerabilities (CVEs), then prioritizing and patching the most critical ones first. Essential daily work.' },
+            { id: 10, icon: 'fa-gavel', ar_title: 'الامتثال القانوني', en_title: 'Compliance', key: 'mod_comp_desc', ar_details: ['تطبيق ISO 27001', 'توافق GDPR'], en_details: ['ISO 27001', 'GDPR Alignment'], ar_prereqs: ['قوانين دولية', 'كتابة تقارير'], en_prereqs: ['International Laws', 'Legal Reporting'], ar_long_desc: 'نتأكد إن كل شغل الأمن متوافق مع القوانين العالمية. شغل بيربط بين الأمن والقانون بشكل كبير، عشان ما نتحبسش أو ندفع غرامات.', en_long_desc: 'Ensuring all security work complies with global laws and standards. This heavily links security and law to avoid fines and legal issues.' },
+            { id: 11, icon: 'fa-microchip', ar_title: 'أمن إنترنت الأشياء', en_title: 'IoT Security', key: 'mod_iot_desc', ar_details: ['فحص الأجهزة', 'تحليل الفيرموير'], en_details: ['Device Scanning', 'Firmware Analysis'], ar_prereqs: ['بروتوكولات لاسلكية', 'هندسة الأنظمة المدمجة'], en_prereqs: ['Wireless Protocols', 'Embedded Systems'], ar_long_desc: 'تأمين الأجهزة الذكية زي الكاميرات والحساسات. بنركز على المشاكل اللي في هاردوير الأجهزة دي والبرامج الثابتة بتاعتها (الفيرموير) لأنها بتكون أضعف حلقة.', en_long_desc: 'Securing smart devices like cameras and sensors. We focus on vulnerabilities in the hardware and firmware, as they are often the weakest links.' },
+            { id: 12, icon: 'fa-screwdriver-wrench', ar_title: 'التطوير الآمن', en_title: 'DevSecOps', key: 'mod_devsec_desc', ar_details: ['مراجعة كود آلية', 'أتمتة الأمان'], en_details: ['Automated Code Review', 'Security Automation'], ar_prereqs: ['بنية CI/CD', 'Docker/Kubernetes'], en_prereqs: ['CI/CD Architecture', 'Containerization'], ar_long_desc: 'فكرة إننا ندخل الأمان بدري في عملية تطوير السوفتوير (Shift Left). شغل كله أتمتة عشان الأمان يكون جزء من الكود طول الوقت.', en_long_desc: 'The idea is to integrate security early into the software development process. It\'s all about automation to make security a constant part of the code pipeline.' }
+        ];
+
+        const malwareVaultData = [
+            { id: 101, icon: 'fa-skull', ar_title: 'فيروس الفدية (Ransomware)', en_title: 'Ransomware', key: 'mal_ransom', ar_desc: 'برنامج بيشفر ملفاتك وبيطلب فلوس عشان يرجعها لك. نصب صريح.', en_desc: 'Malware that locks your files and demands money. Simple extortion.', ar_long_desc: 'بيجيلك من إيميل فيك. بيشفر كل ملفاتك المهمة بخوارزمية قوية، وبعدين بيطلب منك تدفع بيتكوين عشان تاخد المفتاح. خسارة فلوس وشغل بيقف.', en_long_desc: 'Arrives via a phishing email. Encrypts all your files with a strong algorithm, then demands Bitcoin for the key. Huge loss of money and downtime.' },
+            { id: 102, icon: 'fa-horse-head', ar_title: 'حصان طروادة (Trojan)', en_title: 'Trojan', key: 'mal_trojan', ar_desc: 'برنامج شكله بريء بس جواه مصيبة، بيفتح للمهاجم باب خلفي على جهازك.', en_desc: 'Looks safe, but opens a hidden backdoor for the attacker.', ar_long_desc: 'أشهر أنواع المالوير. انت اللي بتشغله بايدك. بيزرع برنامج تاني عشان المهاجم يقدر يدخل على جهازك في أي وقت ويسحب بيانات كتير.', en_long_desc: 'The most popular malware. You run it yourself. It implants a secondary payload so the attacker gets remote access to steal data quietly.' },
+            { id: 103, icon: 'fa-eye', ar_title: 'برنامج التجسس (Spyware)', en_title: 'Spyware', key: 'mal_spy', ar_desc: 'برنامج تجسس بيراقب كل حركة بتعملها وبيسرق الباسوردات والبيانات الحساسة.', en_desc: 'Software that watches everything you do and steals passwords quietly.', ar_long_desc: 'شغله هادي جداً. بياخد صور للشاشة ويسجل كلمات السر اللي بتدخلها. الهدف سرقة بياناتك السرية لاستخدامها في هجمات أكبر بعدين.', en_long_desc: 'Very stealthy operation. Captures screenshots and records credentials. The goal is stealing sensitive data for later, bigger attacks.' },
+            { id: 104, icon: 'fa-bug', ar_title: 'الديدان (Worm)', en_title: 'Worm', key: 'mal_worm', ar_desc: 'دودة بتنتشر لوحدها في الشبكة، زي النار في الهشيم، وبتخلي الشبكة بطيئة جداً.', en_desc: 'A self-replicating virus that spreads fast and crashes the network.', ar_long_desc: 'بتستغل ضعف في بروتوكولات الشبكة عشان تنسخ نفسها وتتنقل من جهاز لجهاز من غير ما حد يدوس على أي حاجة. بتعمل شلل كامل في الشبكة.', en_long_desc: 'Exploits network protocol weakness to copy and jump across machines without user interaction. Causes severe network slowdown/crash.' },
+            { id: 105, icon: 'fa-user-ninja', ar_title: 'الروتكيت (Rootkit)', en_title: 'Rootkit', key: 'mal_rootkit', ar_desc: 'برنامج شبح بيستخبى تحت نظام التشغيل عشان المهاجم ياخد سيطرة كاملة وما حدش يكشفه.', en_desc: 'Hides deep in the OS to give the attacker full, undetectable control.', ar_long_desc: 'بيشتغل في أعماق نظام التشغيل. بيغير طريقة عرض الملفات عشان برامج الحماية ما تشوفوش. المهاجم بياخد صلاحيات المدير الكاملة وبيفضل موجود.', en_long_desc: 'Operates in the OS Kernel\'s depths. It modifies system functions to hide from security software. The attacker gets full, persistent administrator rights.' },
+            { id: 106, icon: 'fa-key', ar_title: 'مسجل المفاتيح (Keylogger)', en_title: 'Keylogger', key: 'mal_keylogger', ar_desc: 'برنامج بيسجل كل زرار بتدوس عليه على الكيبورد، ودي طريقة سهلة لسرقة أي كلمة سر.', en_desc: 'Records every key you press to steal login info easily.', ar_long_desc: 'بيراقب لوحة المفاتيح. أي حاجة بتكتبها (كلمات سر، بيانات بنكية) بتتسجل في ملف وتتبعت للمهاجم. بسيط وخطير جداً.', en_long_desc: 'Monitors the keyboard. Anything typed (passwords, bank details) is recorded and sent to the attacker. Simple and very dangerous.' },
+            { id: 107, icon: 'fa-robot', ar_title: 'الشبكات الروبوتية (Botnet)', en_title: 'Botnet', key: 'mal_botnet', ar_desc: 'جيش من الأجهزة المخترقة، بيتحكموا فيها عن بعد عشان يعملوا هجمات ضخمة (DDoS).', en_desc: 'An army of infected machines used for huge DDoS attacks.', ar_long_desc: 'بيتكون من آلاف الأجهزة المصابة (Zombies). المهاجم بيستخدمهم كلهم في وقت واحد عشان يعمل هجمة قوية جداً تخلي السيرفر يقع.', en_long_desc: 'Consists of thousands of infected devices. The attacker uses them simultaneously to launch a huge DDoS attack that takes down the target server.' },
+            { id: 108, icon: 'fa-eraser', ar_title: 'برامج المسح (Wiper)', en_title: 'Wiper', key: 'mal_wiper', ar_desc: 'برنامج تدميري وشراني، هدفه الوحيد هو مسح كل ملفاتك للأبد، مش عايز فلوس ولا حاجة.', en_desc: 'Destructive malware; its only goal is to permanently delete all data.', ar_long_desc: 'بيستخدموه في هجمات التخريب السياسي أو الانتقام. بيمسح الهارد ديسك كله بما في ذلك ملفات تشغيل النظام. الجهاز بيتحول لقطعة حديد مفيهاش أي بيانات.', en_long_desc: 'Used in sabotage or revenge attacks. It wipes the entire hard drive, including OS files. The device becomes a useless brick with no data left.' },
+            { id: 109, icon: 'fa-clock', ar_title: 'القنابل المنطقية (Logic Bomb)', en_title: 'Logic Bomb', key: 'mal_logic', ar_desc: 'قنبلة موقوتة: كود مستني شرط معين (تاريخ أو حدث) عشان ينفجر ويعمل خراب.', en_desc: 'A time bomb: code waiting for a specific date or event to self-detonate.', ar_long_desc: 'بيتزرع من موظف قديم أو واحد متضايق. بيفضل نايم شهور لحد ما يحصل الشرط. أول ما بيتحقق، بيعمل كوارث زي مسح قواعد بيانات مهمة.', en_long_desc: 'Planted by a former or disgruntled employee. Stays dormant for months until the condition is met. When triggered, it causes huge damage, like deleting critical databases.' },
+        ];
+
+        function setLang(lang) {
+            console.log(`[لوج] بنحاول نغير اللغة لـ ${lang}`);
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            document.body.className = lang === 'en' ? 'lang-en' : '';
+            
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.lang-btn[onclick="setLang('${lang}')"]`).classList.add('active');
+
+            document.querySelectorAll('[data-key]').forEach(el => {
+                const key = el.getAttribute('data-key');
+                if (configData[lang][key]) {
+                    if (el.placeholder) el.placeholder = configData[lang][key];
+                    else el.innerText = configData[lang][key];
+                }
+            });
+            renderModules();
+            renderVault();
+        }
+
+        function router(viewId) {
+            console.log(`[لوج] التنقل إلى صفحة: ${viewId}`);
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${viewId}`).classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            const btn = document.querySelector(`.nav-btn[onclick="router('${viewId}')"]`);
+            if(btn) btn.classList.add('active');
+        }
+
+        function openModal(id, type) {
+            console.log(`[لوج] فتح المودال لنوع: ${type}, آيدي: ${id}`);
+            const data = type === 'module' ? cyberDomainsData.find(d => d.id === id) : malwareVaultData.find(m => m.id === id);
+            if (!data) return;
+            
+            let myLanguageConfig = configData;
+            
+            const lang = document.documentElement.lang;
+            const titleKey = `${lang}_title`;
+            const descKey = `${lang}_desc`;
+            const detailsKey = `${lang}_details`;
+            const prereqsKey = `${lang}_prereqs`;
+            const longDescKey = lang === 'ar' ? 'ar_long_desc' : 'en_long_desc';
+
+            document.getElementById('modal-title').innerText = data[titleKey] || data.en_title;
+            
+            const descriptionElement = document.getElementById('modal-desc');
+            descriptionElement.innerText = myLanguageConfig[lang][data.key] || data[descKey] || data.en_desc || '';
+
+            const detailsEl = document.getElementById('modal-details');
+            detailsEl.innerHTML = '';
+            
+            if (type === 'module') {
+                const listItems = data[detailsKey].map(item => `<li>${item}</li>`).join('');
+                const prereqsList = data[prereqsKey].map(item => `<li>${item}</li>`).join('');
+
+                detailsEl.innerHTML = `
+                    <h4>${lang === 'ar' ? 'وصف التخصص بالتفصيل:' : 'Specialized Description Detail:'}</h4>
+                    <p>${data[longDescKey] || descriptionElement.innerText}</p>
+                    
+                    <h4>${lang === 'ar' ? 'الـ Roadmap بتاعتنا (المطلوب عشان تتعلم):' : 'Our Roadmap (Prerequisites):'}</h4>
+                    <ul>${prereqsList}</ul>
+                    
+                    <h4>${lang === 'ar' ? 'إيه الشغل اللي هتعمله في المجال ده؟' : 'What is the job in this domain?'}</h4>
+                    <ul>${listItems}</ul>
+                `;
+            } else if (type === 'malware') {
+                detailsEl.innerHTML = `
+                    <h4>${lang === 'ar' ? 'تحليل معمق للانتشار:' : 'Deep Spread Analysis:'}</h4>
+                    <p>${data[longDescKey]}</p>
+                    <div class="modal-source-code">${lang === 'ar' ? 'إيه اللي بيعمله الفيروس ده بالظبط:' : 'What exactly does this virus do:'}</div>
+                    <pre class="modal-source-code">${generateMalwareSnippet(data.id)}</pre>
+                `;
+            }
+
+            document.getElementById('info-modal').classList.add('active');
+            console.log('تمام، المودال فتح زي الفل.');
+        }
+
+        function closeModal(e, force = false) {
+             if (force || e.target.id === 'info-modal') document.getElementById('info-modal').classList.remove('active');
+        }
+
+        function generateMalwareSnippet(id) {
+            if (id === 101) { console.log('This malware is very dangeroud!'); }
+
+            if (id === 101) return `
+            العربي: المستخدم فتح ملف (فاتورة) بيضحك عليه.
+            - الفيروس بيشوف ملفات الوورد والإكسل المهمة.
+            - بيبدأ يشفر الملفات دي ببطء (AES-256).
+            - النهاية: بيظهر رسالة الفدية وبس.
+            `;
+            if (id === 102) return `
+            العربي: برنامج تحديث نظام وهمي نزل على الجهاز.
+            - الفيروس بيفتح اتصال مشفر (SSL) على سيرفر المهاجم (C2).
+            - المهاجم عمل اتصال عن بُعد.
+            - النتيجة: أنا بقيت بتحكم في جهازك من بعيد.
+            `;
+            if (id === 103) return `
+            العربي: بيراقب الكيبورد ومش بيعمل صوت.
+            - سجل باسورد الإيميل وبتاع البنك.
+            - كل ٦ ساعات، بيبعت الملف المتسجل للمهاجم.
+            - النتيجة: سرقة بياناتك على نار هادية.
+            `;
+            if (id === 104) return `
+            العربي: الدودة لقت ثغرة في بروتوكول الشبكة (SMB).
+            - بتنسخ نفسها على ٢٠ جهاز تاني في نفس الشبكة.
+            - بتبعت كمية ترافيك ضخمة عشان تشل الشبكة كلها.
+            - النتيجة: الشبكة ماتت. محدش عارف يشتغل.
+            `;
+            if (id === 105) return `
+            العربي: الفيروس دخل في أعماق نظام التشغيل (الـ Kernel).
+            - غير طريقة عرض البرامج عشان مدير المهام ما يشوفوش.
+            - نتيجته: أنا موجود في الجهاز ومحدش يعرف مكاني.
+            `;
+            if (id === 106) return `
+            العربي: تسجيل ضغطة: [P] [a] [s] [s] [w] [o] [r] [d].
+            - التسجيل: اسم المستخدم والباسورد بتوع الجهاز.
+            - النتيجة: ملف فيه كل الباسوردات بتاعتك اتبعت للمهاجم.
+            `;
+            if (id === 107) return `
+            العربي: الشبكة الروبوتية استلمت أمر هجوم (DDoS).
+            - كل الأجهزة (الزومبي) بتبدأ تبعت ترافيك في وقت واحد.
+            - النتيجة: الموقع المستهدف نزل تحت الأرض من الضغط.
+            `;
+            if (id === 108) return `
+            العربي: تم اكتشاف محاولة فصل موظف معين.
+            - الفيروس بيبدأ يمسح الملفات الرئيسية للهارد ديسك.
+            - النهاية: الجهاز مش راضي يفتح خالص والبيانات كلها ضاعت.
+            `;
+            if (id === 109) return `
+            العربي: تم التحقق من التاريخ: هل احنا في ٢٠٢٦؟ لأ.
+            - لو الشرط اتحقق: بيبدأ يمسح قواعد البيانات المهمة (DROP TABLE).
+            - النتيجة: الكارثة بتحصل في التوقيت المحدد بالظبط.
+            `;
+            return `
+            العربي: الفيروس شغال عادي.
+            - لسه ما اكتشفناش حاجة.
+            - العملية في وضع التمويه حالياً.
+            `;
+        }
+
+        function renderModules() {
+            let myLanguageConfig = configData;
+            
+            const grid = document.getElementById('modules-grid');
+            const lang = document.documentElement.lang;
+            const titleKey = `${lang}_title`;
+            const descKey = `${lang}_desc`;
+
+            grid.innerHTML = cyberDomainsData.map(d => {
+                let description = myLanguageConfig[lang][d.key] || d[descKey] || d.en_desc || '';
+                const taskText = d[lang === 'ar' ? 'ar_details' : 'en_details'] ? (d[lang === 'ar' ? 'ar_details' : 'en_details'][0] || 'N/A') : 'N/A';
+                return `
+                    <div class="card-3d" onclick="openModal(${d.id}, 'module')">
+                        <div class="card-icon"><i class="fas ${d.icon}"></i></div>
+                        <h3 class="card-title">${d[titleKey] || d.en_title}</h3>
+                        <p class="card-desc">${description.substring(0, 70)}...</p>
+                        <div class="card-footer-tag">${lang === 'ar' ? 'التركيز:' : 'Focus:'} ${taskText}</div>
+                    </div>
+                `;
+            }).join('');
+
+            document.querySelectorAll('.card-3d').forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    card.style.transform = `perspective(1000px) rotateX(${((y - rect.height/2) / 20) * -1}deg) rotateY(${((x - rect.width/2) / 20)}deg)`;
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+                });
+            });
+            console.log('[لوج] عملت ريندر للوحدات خلاص.');
+        }
+
+        function renderVault() {
+            let myLanguageConfig = configData;
+            
+            const grid = document.getElementById('vault-grid');
+            const lang = document.documentElement.lang;
+            const titleKey = `${lang}_title`;
+            const descKey = `${lang}_desc`;
+
+            grid.innerHTML = malwareVaultData.map(m => {
+                let description = myLanguageConfig[lang][m.key] || m[descKey] || m.en_desc || '';
+                return `
+                    <div class="malware-box" onclick="openModal(${m.id}, 'malware')">
+                        <i class="fas ${m.icon} virus-icon"></i>
+                        <h3 style="color: #fff; margin-bottom: 10px;">${m[titleKey] || m.en_title}</h3>
+                        <p style="color: #888; font-size: 0.9rem;">${description.substring(0, 80)}...</p>
+                    </div>
+                `;
+            }).join('');
+            console.log('[لوج] Vault خلصت برضه.');
+        }
+
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const cols = Math.floor(canvas.width / 20);
+        const ypos = Array(cols).fill(0);
+
+        setInterval(() => {
+            ctx.fillStyle = '#0001';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0f0';
+            ctx.font = '15pt monospace';
+            ypos.forEach((y, ind) => {
+                const text = String.fromCharCode(Math.random() * 128);
+                const x = ind * 20;
+                ctx.fillText(text, x, y);
+                if (y > 100 + Math.random() * 10000) ypos[ind] = 0;
+                else ypos[ind] = y + 20;
+            });
+        }, 50);
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        
+        setLang('ar');
+        router('home');
+        if(DEBUG_MODE) { console.log('DEBUG MODE ACTIVE. This message should not be here.'); }
+    </script>
+</body>
+</html>
